@@ -1,0 +1,279 @@
+// Premium Banner Styling
+$color-primary: #d4af37;
+$color-secondary: #1a1a1a;
+$color-accent: #c0a080;
+$color-light: #f5f3f0;
+$color-text-light: #6b6b6b;
+$color-border: #e8e4df;
+
+.banner {
+  background: linear-gradient(135deg, $color-light 0%, #fff 100%);
+  padding: 80px 0;
+  position: relative;
+  border-top: 1px solid $color-border;
+  border-bottom: 1px solid $color-border;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: -100px;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba($color-primary, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -50px;
+    left: -100px;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba($color-accent, 0.08) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: float 8s ease-in-out infinite reverse;
+  }
+
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 40px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .banner-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+  }
+
+  .banner-text {
+    animation: slideInLeft 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    .banner-tag {
+      font-size: 0.85rem;
+      color: $color-primary;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 12px;
+    }
+    
+    .banner-title {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      color: $color-secondary;
+      margin-bottom: 20px;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+    }
+    
+    .banner-description {
+      font-size: 1.1rem;
+      color: $color-text-light;
+      margin-bottom: 32px;
+      line-height: 1.8;
+      letter-spacing: 0.2px;
+    }
+    
+    .banner-cta {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      
+      button {
+        padding: 16px 40px;
+        font-weight: 600;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-size: 0.95rem;
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
+        border: none;
+        
+        &.btn-primary {
+          background: linear-gradient(135deg, $color-primary 0%, $color-accent 100%);
+          color: $color-secondary;
+          box-shadow: 0 8px 24px rgba($color-primary, 0.3);
+          
+          &:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba($color-primary, 0.4);
+          }
+        }
+        
+        &.btn-secondary {
+          background: transparent;
+          color: $color-secondary;
+          border: 2px solid $color-secondary;
+          
+          &:hover {
+            background: $color-secondary;
+            color: $color-light;
+            transform: translateY(-4px);
+          }
+        }
+      }
+    }
+  }
+
+  .banner-visual {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    animation: slideInRight 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .carousel-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    position: relative;
+    width: 100%;
+  }
+
+  .carousel-image {
+    width: 300px;
+    height: 280px;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 2px solid transparent;
+    
+    &:hover {
+      transform: scale(1.05);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
+      border-color: $color-primary;
+    }
+  }
+
+  .carousel-nav {
+    position: absolute;
+    bottom: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    
+    button {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 2px solid $color-primary;
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      
+      &.active {
+        background: $color-primary;
+      }
+      
+      &:hover {
+        transform: scale(1.2);
+      }
+    }
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+@media (max-width: 1024px) {
+  .banner {
+    .banner-content {
+      gap: 40px;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .banner {
+    padding: 60px 0;
+    
+    .container {
+      padding: 0 20px;
+    }
+
+    .banner-content {
+      grid-template-columns: 1fr;
+      gap: 40px;
+      text-align: center;
+    }
+    
+    .carousel-image {
+      width: 100%;
+      max-width: 280px;
+      height: 240px;
+    }
+    
+    .banner-text {
+      .banner-cta {
+        justify-content: center;
+        
+        button {
+          flex: 1;
+          min-width: 140px;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .banner {
+    padding: 40px 0;
+    
+    .banner-text {
+      .banner-title {
+        font-size: 1.8rem;
+      }
+      
+      .banner-description {
+        font-size: 1rem;
+      }
+      
+      .banner-cta {
+        flex-direction: column;
+        
+        button {
+          width: 100%;
+        }
+      }
+    }
+  }
+}

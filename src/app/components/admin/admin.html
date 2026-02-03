@@ -1,0 +1,230 @@
+<div class="admin-container">
+  <div class="admin-header">
+    <div class="admin-title">
+      <h1>Admin Portal</h1>
+      <p>Manage products and inventory</p>
+    </div>
+    <button mat-raised-button color="warn" (click)="logout()" class="logout-btn">
+      <mat-icon>logout</mat-icon>
+      Logout
+    </button>
+  </div>
+
+  <div class="admin-content">
+    <mat-tab-group (selectedIndexChange)="activeTab.set($event)" [selectedIndex]="activeTab()">
+      <!-- Add/Edit Product Tab -->
+      <mat-tab label="Add Product">
+        <div class="tab-content">
+          <mat-card class="product-form-card">
+            <mat-card-header>
+              <mat-card-title>
+                {{ isEditMode() ? 'Edit Product' : 'Add New Product' }}
+              </mat-card-title>
+            </mat-card-header>
+
+            <mat-card-content>
+              <form [formGroup]="productForm" (ngSubmit)="onSubmit()" class="product-form">
+                <div class="form-row">
+                  <mat-form-field class="form-field">
+                    <mat-label>Product Name</mat-label>
+                    <input matInput formControlName="name" placeholder="e.g., Classic Streetwear Hoodie" />
+                  </mat-form-field>
+
+                  <mat-form-field class="form-field">
+                    <mat-label>Brand</mat-label>
+                    <input matInput formControlName="brand" placeholder="e.g., Lincee" />
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field class="form-field">
+                    <mat-label>Price (USD)</mat-label>
+                    <input matInput type="number" formControlName="price" placeholder="0.00" step="0.01" />
+                  </mat-form-field>
+
+                  <mat-form-field class="form-field">
+                    <mat-label>Category</mat-label>
+                    <mat-select formControlName="category">
+                      <mat-option *ngFor="let cat of categories" [value]="cat">
+                        {{ cat }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+
+                  <mat-form-field class="form-field">
+                    <mat-label>Stock</mat-label>
+                    <input matInput type="number" formControlName="stock" placeholder="0" />
+                  </mat-form-field>
+                </div>
+
+                <mat-form-field class="form-field-full">
+                  <mat-label>Description</mat-label>
+                  <textarea matInput formControlName="description" rows="4" 
+                    placeholder="Detailed product description (min 10 characters)"></textarea>
+                </mat-form-field>
+
+                <div class="form-row">
+                  <mat-form-field class="form-field">
+                    <mat-label>Sizes (comma-separated)</mat-label>
+                    <input matInput formControlName="sizes" placeholder="S,M,L,XL" />
+                  </mat-form-field>
+
+                  <mat-form-field class="form-field">
+                    <mat-label>Colors (comma-separated)</mat-label>
+                    <input matInput formControlName="colors" placeholder="Black,White,Gray" />
+                  </mat-form-field>
+                </div>
+
+                <mat-form-field class="form-field-full">
+                  <mat-label>Image URL</mat-label>
+                  <input matInput formControlName="imageUrl" placeholder="https://example.com/image.jpg" />
+                </mat-form-field>
+
+                <div class="checkbox-group">
+                  <label class="checkbox-label">
+                    <input type="checkbox" formControlName="featured" />
+                    <span>Featured Product</span>
+                  </label>
+                </div>
+
+                <div class="message-box" *ngIf="successMessage()">
+                  <p class="success-message">✓ {{ successMessage() }}</p>
+                </div>
+
+                <div class="message-box" *ngIf="errorMessage()">
+                  <p class="error-message">✗ {{ errorMessage() }}</p>
+                </div>
+
+                <div class="form-actions">
+                  <button mat-raised-button color="primary" type="submit" [disabled]="isLoading() || productForm.invalid">
+                    <span *ngIf="!isLoading()">{{ isEditMode() ? 'Update Product' : 'Add Product' }}</span>
+                    <span *ngIf="isLoading()">Saving...</span>
+                  </button>
+                  <button mat-stroked-button type="button" (click)="resetForm()" [disabled]="isLoading()">
+                    Clear
+                  </button>
+                </div>
+              </form>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- Products List Tab -->
+      <mat-tab label="Products">
+        <div class="tab-content">
+          <mat-card class="products-card">
+            <mat-card-header>
+              <mat-card-title>Product Inventory</mat-card-title>
+              <mat-card-subtitle>Total Products: {{ products().length }}</mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-card-content>
+              <div class="table-container">
+                <table mat-table [dataSource]="products()" class="products-table">
+                  <!-- ID Column -->
+                  <ng-container matColumnDef="id">
+                    <th mat-header-cell *matHeaderCellDef>ID</th>
+                    <td mat-cell *matCellDef="let element">{{ element.id }}</td>
+                  </ng-container>
+
+                  <!-- Name Column -->
+                  <ng-container matColumnDef="name">
+                    <th mat-header-cell *matHeaderCellDef>Product Name</th>
+                    <td mat-cell *matCellDef="let element">{{ element.name }}</td>
+                  </ng-container>
+
+                  <!-- Price Column -->
+                  <ng-container matColumnDef="price">
+                    <th mat-header-cell *matHeaderCellDef>Price</th>
+                    <td mat-cell *matCellDef="let element">${{ element.price.toFixed(2) }}</td>
+                  </ng-container>
+
+                  <!-- Category Column -->
+                  <ng-container matColumnDef="category">
+                    <th mat-header-cell *matHeaderCellDef>Category</th>
+                    <td mat-cell *matCellDef="let element">
+                      <span class="category-badge">{{ element.category }}</span>
+                    </td>
+                  </ng-container>
+
+                  <!-- Stock Column -->
+                  <ng-container matColumnDef="stock">
+                    <th mat-header-cell *matHeaderCellDef>Stock</th>
+                    <td mat-cell *matCellDef="let element">
+                      <span [class.low-stock]="element.stock < 10" [class.in-stock]="element.stock >= 10">
+                        {{ element.stock }}
+                      </span>
+                    </td>
+                  </ng-container>
+
+                  <!-- Actions Column -->
+                  <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef>Actions</th>
+                    <td mat-cell *matCellDef="let element">
+                      <button mat-icon-button color="primary" (click)="editProduct(element)" title="Edit">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                      <button mat-icon-button color="warn" (click)="deleteProduct(element.id, element.name)" title="Delete">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                </table>
+              </div>
+
+              <div class="empty-state" *ngIf="products().length === 0">
+                <mat-icon>inventory_2</mat-icon>
+                <p>No products yet. Add your first product using the form above.</p>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- Statistics Tab -->
+      <mat-tab label="Statistics">
+        <div class="tab-content">
+          <div class="stats-grid">
+            <mat-card class="stat-card">
+              <div class="stat-value">{{ products().length }}</div>
+              <div class="stat-label">Total Products</div>
+            </mat-card>
+
+            <mat-card class="stat-card">
+              <div class="stat-value">{{ products().filter(p => p.stock > 0).length }}</div>
+              <div class="stat-label">In Stock</div>
+            </mat-card>
+
+            <mat-card class="stat-card">
+              <div class="stat-value">{{ products().filter(p => p.stock === 0).length }}</div>
+              <div class="stat-label">Out of Stock</div>
+            </mat-card>
+
+            <mat-card class="stat-card">
+              <div class="stat-value">${{ (products().reduce((sum, p) => sum + (p.price || 0), 0)).toFixed(2) }}</div>
+              <div class="stat-label">Total Inventory Value</div>
+            </mat-card>
+          </div>
+
+          <mat-card class="chart-card">
+            <mat-card-header>
+              <mat-card-title>Products by Category</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="category-stats">
+                <div class="category-stat" *ngFor="let cat of categories">
+                  <span class="category-name">{{ cat }}</span>
+                  <span class="category-count">{{ products().filter(p => p.category === cat).length }}</span>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+</div>

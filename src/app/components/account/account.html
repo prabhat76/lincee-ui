@@ -1,0 +1,85 @@
+<div class="account-container" *ngIf="!isLoading(); else loadingTemplate">
+  <div class="account-header">
+    <h1>My Account</h1>
+    <button class="logout-btn" (click)="logout()">Logout</button>
+  </div>
+
+  <div class="account-tabs">
+    <button
+      class="tab-btn"
+      [class.active]="activeTab() === 'profile'"
+      (click)="setActiveTab('profile')"
+    >
+      Profile
+    </button>
+    <button
+      class="tab-btn"
+      [class.active]="activeTab() === 'orders'"
+      (click)="setActiveTab('orders')"
+    >
+      Orders
+    </button>
+    <button
+      class="tab-btn"
+      [class.active]="activeTab() === 'addresses'"
+      (click)="setActiveTab('addresses')"
+    >
+      Addresses
+    </button>
+  </div>
+
+  <div class="account-content">
+    <div *ngIf="activeTab() === 'profile'" class="tab-panel">
+      <div class="profile-card">
+        <h2>Profile Information</h2>
+        <div class="profile-info" *ngIf="user()">
+          <div class="info-row">
+            <label>Username:</label>
+            <span>{{ user().username }}</span>
+          </div>
+          <div class="info-row">
+            <label>Email:</label>
+            <span>{{ user().email }}</span>
+          </div>
+          <div class="info-row" *ngIf="user().firstName">
+            <label>First Name:</label>
+            <span>{{ user().firstName }}</span>
+          </div>
+          <div class="info-row" *ngIf="user().lastName">
+            <label>Last Name:</label>
+            <span>{{ user().lastName }}</span>
+          </div>
+          <div class="info-row" *ngIf="user().phone">
+            <label>Phone:</label>
+            <span>{{ user().phone }}</span>
+          </div>
+          <div class="info-row">
+            <label>Account Created:</label>
+            <span>{{ user().createdAt | date: 'MMM d, yyyy' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="activeTab() === 'orders'" class="tab-panel">
+      <div class="section-card">
+        <h2>Order History</h2>
+        <p class="empty-state">Your order history will appear here</p>
+      </div>
+    </div>
+
+    <div *ngIf="activeTab() === 'addresses'" class="tab-panel">
+      <div class="section-card">
+        <h2>Saved Addresses</h2>
+        <p class="empty-state">No saved addresses yet</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #loadingTemplate>
+  <div class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading your account...</p>
+  </div>
+</ng-template>

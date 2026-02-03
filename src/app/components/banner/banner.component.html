@@ -1,0 +1,59 @@
+<section class="banner">
+  <div class="banner-background">
+    <div class="mesh-gradient"></div>
+    <div class="floating-elements">
+      <div class="element element-1"></div>
+      <div class="element element-2"></div>
+      <div class="element element-3"></div>
+    </div>
+  </div>
+  
+  <div class="container">
+    <div class="banner-content">
+      <div class="banner-text">
+        <div class="offer-badge">
+          <span class="badge-icon">⚡</span>
+          <span>LIMITED TIME</span>
+        </div>
+        <h2 class="banner-title">
+          <span class="title-main">Get</span>
+          <span class="title-highlight">30% OFF</span>
+          <span class="title-sub">Your First Order</span>
+        </h2>
+        <p class="banner-description">
+          Join the LINCEE family and unlock exclusive access to premium streetwear.
+          <br><strong>Use code: WELCOME30</strong>
+        </p>
+        <div class="banner-actions">
+          <button class="btn btn-primary">
+            <span>Claim Offer</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </button>
+          <div class="timer">
+            <span class="timer-label">Ends in:</span>
+            <div class="timer-display">
+              <span class="time-unit">23<small>h</small></span>
+              <span class="separator">:</span>
+              <span class="time-unit">45<small>m</small></span>
+              <span class="separator">:</span>
+              <span class="time-unit">12<small>s</small></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="banner-visual">
+        <div class="carousel-container">
+          <button class="carousel-btn prev" (click)="prevImage()" aria-label="Previous banner">&#8592;</button>
+          <img [src]="images[currentIndex]" class="carousel-image" (click)="onImageClick()" alt="Banner" />
+          <button class="carousel-btn next" (click)="nextImage()" aria-label="Next banner">&#8594;</button>
+        </div>
+        <div class="carousel-indicators">
+          <span *ngFor="let img of images; let i = index" [class.active]="i === currentIndex" class="indicator"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
