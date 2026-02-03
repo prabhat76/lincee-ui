@@ -29,7 +29,8 @@
       </button>
       
       <button mat-icon-button class="nav-icon cart-btn" [matBadge]="cartItemCount()" 
-              [matBadgeHidden]="cartItemCount() === 0" matBadgeColor="accent">
+              [matBadgeHidden]="cartItemCount() === 0" matBadgeColor="accent"
+              (click)="goToCart()">
         <mat-icon>shopping_cart</mat-icon>
       </button>
       

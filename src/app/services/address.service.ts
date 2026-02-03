@@ -14,6 +14,10 @@ export class AddressService {
     return this.http.post(this.baseUrl, data, { params });
   }
 
+  createAddress(data: any): Observable<any> {
+    return this.http.post(this.baseUrl, data);
+  }
+
   getById(id: number): Observable<any> {
     return this.http.get(`${this.baseUrl}/${id}`);
   }

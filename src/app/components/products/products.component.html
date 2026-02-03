@@ -25,9 +25,7 @@
         </div>
         
         <div class="product-image">
-          <div class="image-placeholder">
-            <mat-icon class="placeholder-icon">image</mat-icon>
-          </div>
+          <img [src]="getProductImage(product)" [alt]="product.name" />
           <div class="image-overlay">
             <button mat-fab color="primary" class="quick-view-btn animated-quick-view">
               <mat-icon>visibility</mat-icon>

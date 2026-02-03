@@ -1,0 +1,189 @@
+<div class="checkout-container">
+  <h1>Checkout</h1>
+
+  <mat-card class="checkout-card">
+    <mat-stepper #stepper>
+      <!-- Step 1: Shipping Information -->
+      <mat-step [stepControl]="shippingForm">
+        <ng-template matStepLabel>Shipping Information</ng-template>
+        
+        <div class="saved-addresses" *ngIf="savedAddresses().length > 0">
+          <h3>Use Saved Address</h3>
+          <div class="address-grid">
+            <mat-card class="address-card" *ngFor="let addr of savedAddresses()" 
+                      (click)="useAddress(addr)"
+                      [class.selected]="selectedAddressId() === addr.id">
+              <p><strong>{{addr.street}}</strong></p>
+              <p>{{addr.city}}, {{addr.state}} {{addr.zipCode}}</p>
+            </mat-card>
+          </div>
+        </div>
+
+        <form [formGroup]="shippingForm" class="shipping-form">
+          <div class="form-row">
+            <mat-form-field>
+              <mat-label>First Name</mat-label>
+              <input matInput formControlName="firstName" required>
+              <mat-error *ngIf="shippingForm.get('firstName')?.hasError('required')">
+                First name is required
+              </mat-error>
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label>Last Name</mat-label>
+              <input matInput formControlName="lastName" required>
+              <mat-error *ngIf="shippingForm.get('lastName')?.hasError('required')">
+                Last name is required
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field>
+              <mat-label>Email</mat-label>
+              <input matInput type="email" formControlName="email" required>
+              <mat-error *ngIf="shippingForm.get('email')?.hasError('required')">
+                Email is required
+              </mat-error>
+              <mat-error *ngIf="shippingForm.get('email')?.hasError('email')">
+                Enter a valid email
+              </mat-error>
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label>Phone</mat-label>
+              <input matInput formControlName="phone" required placeholder="1234567890">
+              <mat-error *ngIf="shippingForm.get('phone')?.hasError('required')">
+                Phone is required
+              </mat-error>
+              <mat-error *ngIf="shippingForm.get('phone')?.hasError('pattern')">
+                Enter 10-digit phone number
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <mat-form-field class="full-width">
+            <mat-label>Address Line 1</mat-label>
+            <input matInput formControlName="addressLine1" required>
+            <mat-error *ngIf="shippingForm.get('addressLine1')?.hasError('required')">
+              Address is required
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field class="full-width">
+            <mat-label>Address Line 2 (Optional)</mat-label>
+            <input matInput formControlName="addressLine2">
+          </mat-form-field>
+
+          <div class="form-row">
+            <mat-form-field>
+              <mat-label>City</mat-label>
+              <input matInput formControlName="city" required>
+              <mat-error *ngIf="shippingForm.get('city')?.hasError('required')">
+                City is required
+              </mat-error>
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label>State</mat-label>
+              <input matInput formControlName="state" required>
+              <mat-error *ngIf="shippingForm.get('state')?.hasError('required')">
+                State is required
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field>
+              <mat-label>Postal Code</mat-label>
+              <input matInput formControlName="postalCode" required placeholder="12345">
+              <mat-error *ngIf="shippingForm.get('postalCode')?.hasError('required')">
+                Postal code is required
+              </mat-error>
+              <mat-error *ngIf="shippingForm.get('postalCode')?.hasError('pattern')">
+                Enter valid postal code
+              </mat-error>
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label>Country</mat-label>
+              <input matInput formControlName="country" required>
+              <mat-error *ngIf="shippingForm.get('country')?.hasError('required')">
+                Country is required
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="stepper-actions">
+            <button mat-raised-button color="primary" matStepperNext>NEXT</button>
+          </div>
+        </form>
+      </mat-step>
+
+      <!-- Step 2: Review Order -->
+      <mat-step>
+        <ng-template matStepLabel>Review Order</ng-template>
+        
+        <div class="order-review">
+          <h3>Order Items</h3>
+          <div class="review-items">
+            <div class="review-item" *ngFor="let item of cartItems()">
+              <div class="item-info">
+                <strong>{{item.product.name}}</strong>
+                <span *ngIf="item.size">(Size: {{item.size}})</span>
+              </div>
+              <div class="item-qty">Qty: {{item.quantity}}</div>
+              <div class="item-price">${{getItemSubtotal(item)}}</div>
+            </div>
+          </div>
+
+          <div class="order-totals">
+            <div class="total-row">
+              <span>Subtotal:</span>
+              <span>${{getOrderSummary().subtotal}}</span>
+            </div>
+            <div class="total-row">
+              <span>Shipping:</span>
+              <span class="free">FREE</span>
+            </div>
+            <div class="total-row grand-total">
+              <span>Total:</span>
+              <span>${{getOrderSummary().total}}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="stepper-actions">
+          <button mat-button matStepperPrevious>BACK</button>
+          <button mat-raised-button color="primary" matStepperNext>NEXT</button>
+        </div>
+      </mat-step>
+
+      <!-- Step 3: Payment -->
+      <mat-step [stepControl]="paymentForm">
+        <ng-template matStepLabel>Payment</ng-template>
+        
+        <form [formGroup]="paymentForm">
+          <mat-form-field class="full-width">
+            <mat-label>Payment Method</mat-label>
+            <mat-select formControlName="paymentMethod">
+              <mat-option value="COD">Cash on Delivery</mat-option>
+              <mat-option value="CARD" disabled>Card Payment (Coming Soon)</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <div class="payment-info" *ngIf="paymentForm.value.paymentMethod === 'COD'">
+            <mat-icon>info</mat-icon>
+            <p>You will pay cash when your order is delivered.</p>
+          </div>
+
+          <div class="stepper-actions">
+            <button mat-button matStepperPrevious>BACK</button>
+            <button mat-raised-button color="primary" 
+                    (click)="placeOrder()"
+                    [disabled]="isPlacingOrder()">
+              <mat-spinner diameter="20" *ngIf="isPlacingOrder()"></mat-spinner>
+              <span *ngIf="!isPlacingOrder()">PLACE ORDER</span>
+            </button>
+          </div>
+        </form>
+      </mat-step>
+    </mat-stepper>
+  </mat-card>
+</div>

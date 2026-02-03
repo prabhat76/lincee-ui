@@ -6,13 +6,16 @@ import { API_CONFIG, getFullUrl } from '../config/api.config';
 
 export interface OrderRequest {
   userId: number;
-  shippingAddress: string;
-  paymentMethod: string;
+  shippingAddressId?: number;
+  billingAddressId?: number;
+  paymentMethodId?: number;
   items: {
     productId: number;
     quantity: number;
     size?: string;
   }[];
+  shippingMethod?: string;
+  notes?: string;
 }
 
 export interface Order {
@@ -43,18 +46,5 @@ export class OrderService {
 
   getUserOrders(userId: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/user/${userId}?page=0&size=20`);
-  }
-
-  createOrderFromCart(cartItems: CartItem[], userId: number, shippingAddress: string, paymentMethod: string): OrderRequest {
-    return {
-      userId,
-      shippingAddress,
-      paymentMethod,
-      items: cartItems.map(item => ({
-        productId: item.product.id,
-        quantity: item.quantity,
-        size: item.size
-      }))
-    };
   }
 }

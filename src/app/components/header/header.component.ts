@@ -31,7 +31,7 @@ export class HeaderComponent implements OnInit {
 
   ngOnInit() {
     // Check if user is logged in
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('authToken') || localStorage.getItem('token');
     this.isLoggedIn.set(!!token);
 
     // Subscribe to cart changes
@@ -44,9 +44,14 @@ export class HeaderComponent implements OnInit {
     this.isMenuOpen.update(v => !v);
   }
 
+  goToCart() {
+    this.router.navigate(['/cart']);
+  }
+
   logout() {
     this.authService.logout().subscribe({
       next: () => {
+        localStorage.removeItem('authToken');
         localStorage.removeItem('token');
         localStorage.removeItem('userId');
         this.isLoggedIn.set(false);

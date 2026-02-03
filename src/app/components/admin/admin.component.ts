@@ -56,6 +56,7 @@ export class AdminComponent implements OnInit {
   availableProducts = signal<any[]>([]);
   selectedProductIds = signal<number[]>([]);
   isDarkMode = signal(false);
+  selectedImages = signal<Array<{file: File, preview: string}>>([]);
 
   displayedColumns = ['id', 'name', 'price', 'category', 'stock', 'actions'];
   collectionColumns = ['id', 'name', 'slug', 'productCount', 'featured', 'active', 'actions'];
@@ -244,6 +245,48 @@ export class AdminComponent implements OnInit {
     });
   }
 
+  onImageSelected(event: any) {
+    const files = event.target.files;
+    if (files && files.length > 0) {
+      const newImages: Array<{file: File, preview: string}> = [];
+      
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+          this.showNotification('Please select only image files', 'error');
+          continue;
+        }
+        
+        // Validate file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+          this.showNotification(`Image ${file.name} is too large. Max size is 5MB`, 'error');
+          continue;
+        }
+        
+        // Create preview
+        const reader = new FileReader();
+        reader.onload = (e: any) => {
+          newImages.push({
+            file: file,
+            preview: e.target.result
+          });
+          
+          // Update signal after all files are read
+          if (newImages.length === files.length || i === files.length - 1) {
+            this.selectedImages.update(current => [...current, ...newImages]);
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+  }
+
+  removeImage(index: number) {
+    this.selectedImages.update(images => images.filter((_, i) => i !== index));
+  }
+
   deleteProduct(id: number, name: string) {
     if (confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.`)) {
       this.isLoading.set(true);
@@ -270,6 +313,7 @@ export class AdminComponent implements OnInit {
     });
     this.isEditMode.set(false);
     this.editingProductId.set(null);
+    this.selectedImages.set([]);
   }
 
   getInStockCount(): number {

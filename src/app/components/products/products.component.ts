@@ -9,11 +9,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-products',
   standalone: true,
-  imports: [CommonModule, HttpClientModule, MatCardModule, MatButtonModule, MatIconModule, MatChipsModule, MatProgressSpinnerModule],
+  imports: [CommonModule, HttpClientModule, MatCardModule, MatButtonModule, MatIconModule, MatChipsModule, MatProgressSpinnerModule, MatSnackBarModule],
   templateUrl: './products.component.html',
   styleUrl: './products.component.scss'
 })
@@ -23,7 +24,8 @@ export class ProductsComponent implements OnInit {
 
   constructor(
     private productService: ProductService,
-    private cartService: CartService
+    private cartService: CartService,
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit() {
@@ -54,6 +56,23 @@ export class ProductsComponent implements OnInit {
   }
 
   addToCart(product: Product) {
+    if (product.stockQuantity <= 0) {
+      this.snackBar.open('This product is out of stock', 'OK', { duration: 3000 });
+      return;
+    }
     this.cartService.addToCart(product);
+    this.snackBar.open(`${product.name} added to cart`, 'VIEW CART', {
+      duration: 3000,
+      horizontalPosition: 'right',
+      verticalPosition: 'top'
+    }).onAction().subscribe(() => {
+      window.location.href = '/cart';
+    });
+  }
+
+  getProductImage(product: Product): string {
+    return product.imageUrls && product.imageUrls.length > 0
+      ? product.imageUrls[0]
+      : 'https://via.placeholder.com/400x400/d4af37/ffffff?text=' + encodeURIComponent(product.name);
   }
 }

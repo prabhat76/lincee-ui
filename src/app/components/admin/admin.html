@@ -80,10 +80,38 @@
                   </mat-form-field>
                 </div>
 
-                <mat-form-field class="form-field-full">
-                  <mat-label>Image URL</mat-label>
-                  <input matInput formControlName="imageUrl" placeholder="https://example.com/image.jpg" />
-                </mat-form-field>
+                <div class="image-upload-section">
+                  <h4>Product Images</h4>
+                  <div class="upload-options">
+                    <div class="upload-option">
+                      <label class="file-upload-label">
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          (change)="onImageSelected($event)"
+                          multiple
+                          hidden
+                        />
+                        <mat-icon>cloud_upload</mat-icon>
+                        <span>Upload Images</span>
+                      </label>
+                    </div>
+                    <div class="divider-text">OR</div>
+                    <mat-form-field class="form-field-full">
+                      <mat-label>Image URL</mat-label>
+                      <input matInput formControlName="imageUrl" placeholder="https://example.com/image.jpg" />
+                    </mat-form-field>
+                  </div>
+                  
+                  <div class="image-preview-grid" *ngIf="selectedImages().length > 0">
+                    <div class="image-preview-item" *ngFor="let img of selectedImages(); let i = index">
+                      <img [src]="img.preview" [alt]="'Preview ' + i" />
+                      <button type="button" class="remove-image-btn" (click)="removeImage(i)" mat-icon-button>
+                        <mat-icon>close</mat-icon>
+                      </button>
+                    </div>
+                  </div>
+                </div>
 
                 <div class="checkbox-group">
                   <label class="checkbox-label">
