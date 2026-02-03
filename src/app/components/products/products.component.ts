@@ -33,7 +33,8 @@ export class ProductsComponent implements OnInit {
   loadProducts() {
     this.productService.getAllProducts().subscribe({
       next: (response) => {
-        this.products = response.content || response;
+        console.log('Products loaded:', response);
+        this.products = response;
         this.loading = false;
       },
       error: (error) => {
@@ -41,12 +42,12 @@ export class ProductsComponent implements OnInit {
         this.loading = false;
         // Fallback data
         this.products = [
-          { id: 1, name: 'Premium Hoodie', price: 89, category: 'Hoodies', description: 'Premium cotton blend hoodie with modern fit', stockQuantity: 10, imageUrls: [], availableSizes: ['S', 'M', 'L', 'XL'], isActive: true, isFeatured: true },
-          { id: 2, name: 'Street Jacket', price: 129, category: 'Jackets', description: 'Urban style jacket with premium materials', stockQuantity: 5, imageUrls: [], availableSizes: ['M', 'L', 'XL'], isActive: true, isFeatured: false },
-          { id: 3, name: 'Urban T-Shirt', price: 39, category: 'T-Shirts', description: 'Comfortable urban style t-shirt', stockQuantity: 20, imageUrls: [], availableSizes: ['S', 'M', 'L'], isActive: true, isFeatured: true },
-          { id: 4, name: 'Cargo Pants', price: 79, category: 'Pants', description: 'Functional cargo pants with multiple pockets', stockQuantity: 8, imageUrls: [], availableSizes: ['M', 'L', 'XL'], isActive: true, isFeatured: false },
-          { id: 5, name: 'Sneaker Collection', price: 159, category: 'Shoes', description: 'Limited edition streetwear sneakers', stockQuantity: 3, imageUrls: [], availableSizes: ['8', '9', '10', '11'], isActive: true, isFeatured: true },
-          { id: 6, name: 'Baseball Cap', price: 29, category: 'Accessories', description: 'Classic baseball cap with embroidered logo', stockQuantity: 15, imageUrls: [], availableSizes: ['One Size'], isActive: true, isFeatured: false }
+          { id: 1, name: 'Premium Hoodie', price: 89, category: 'Hoodies', description: 'Premium cotton blend hoodie with modern fit', stockQuantity: 10, imageUrls: [], availableSizes: ['S', 'M', 'L', 'XL'], active: true, featured: true },
+          { id: 2, name: 'Street Jacket', price: 129, category: 'Jackets', description: 'Urban style jacket with premium materials', stockQuantity: 5, imageUrls: [], availableSizes: ['M', 'L', 'XL'], active: true, featured: false },
+          { id: 3, name: 'Urban T-Shirt', price: 39, category: 'T-Shirts', description: 'Comfortable urban style t-shirt', stockQuantity: 20, imageUrls: [], availableSizes: ['S', 'M', 'L'], active: true, featured: true },
+          { id: 4, name: 'Cargo Pants', price: 79, category: 'Pants', description: 'Functional cargo pants with multiple pockets', stockQuantity: 8, imageUrls: [], availableSizes: ['M', 'L', 'XL'], active: true, featured: false },
+          { id: 5, name: 'Sneaker Collection', price: 159, category: 'Shoes', description: 'Limited edition streetwear sneakers', stockQuantity: 3, imageUrls: [], availableSizes: ['8', '9', '10', '11'], active: true, featured: true },
+          { id: 6, name: 'Baseball Cap', price: 29, category: 'Accessories', description: 'Classic baseball cap with embroidered logo', stockQuantity: 15, imageUrls: [], availableSizes: ['One Size'], active: true, featured: false }
         ];
       }
     });

@@ -1,18 +1,18 @@
 // ============================================
-// PREMIUM THEME - Global Styles
+// LINCEE STREETWEAR - Modern Luxury Theme
 // ============================================
 
-// Color Palette - Premium Dark Theme
-$color-primary: #d4af37;           // Luxury Gold
-$color-secondary: #1a1a1a;         // Deep Black
-$color-accent: #c0a080;            // Muted Gold
-$color-dark: #0f0f0f;              // Pure Black
-$color-light: #f5f3f0;             // Off-white
-$color-text: #2a2a2a;              // Dark Gray
-$color-text-light: #6b6b6b;        // Medium Gray
-$color-border: #e8e4df;            // Light Gray
+// Color Palette - Luxury Streetwear
+$color-primary: #000;              // Pure Black
+$color-secondary: #fff;            // Pure White
+$color-accent: #d4af37;            // Gold Accent
+$color-dark: #0a0a0a;              // Near Black
+$color-light: #f5f5f5;             // Light Gray
+$color-text: #1a1a1a;              // Dark Text
+$color-text-light: #666;           // Medium Gray
+$color-border: #e0e0e0;            // Subtle Border
 $color-success: #4ecca3;
-$color-error: #e74c3c;
+$color-error: #d45454;
 
 * {
   margin: 0;
@@ -28,12 +28,12 @@ body {
   font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   line-height: 1.6;
   color: $color-text;
-  background: #fff;
+  background: $color-secondary;
   letter-spacing: 0.3px;
 }
 
 main {
-  padding-top: 80px;
+  padding-top: 114px; // Top banner (34px) + Header (80px)
 }
 
 a {
@@ -94,5 +94,108 @@ p {
   
   &:hover {
     background: $color-accent;
+  }
+}
+
+// Snackbar Styles
+.snackbar-success {
+  background: $color-success !important;
+  color: white !important;
+  
+  .mat-mdc-snack-bar-label {
+    color: white !important;
+  }
+}
+
+.snackbar-error {
+  background: $color-error !important;
+  color: white !important;
+  
+  .mat-mdc-snack-bar-label {
+    color: white !important;
+  }
+}
+
+.snackbar-info {
+  background: #2196F3 !important;
+  color: white !important;
+  
+  .mat-mdc-snack-bar-label {
+    color: white !important;
+  }
+}
+
+// Animation utilities
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fade-in {
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+// Container utilities
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 40px;
+  
+  @media (max-width: 768px) {
+    padding: 0 20px;
+  }
+}
+
+.container-fluid {
+  width: 100%;
+  padding: 0 40px;
+  
+  @media (max-width: 768px) {
+    padding: 0 20px;
+  }
+}
+
+// Section spacing
+.section {
+  padding: 80px 0;
+  
+  @media (max-width: 768px) {
+    padding: 60px 0;
+  }
+}
+
+.section-title {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 60px;
+  letter-spacing: -0.02em;
+  
+  &::after {
+    content: '';
+    display: block;
+    width: 80px;
+    height: 3px;
+    background: $color-primary;
+    margin: 20px auto 0;
   }
 }

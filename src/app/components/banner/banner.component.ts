@@ -26,4 +26,12 @@ export class BannerComponent {
   onImageClick() {
     this.nextImage();
   }
+
+  onShopClick() {
+    console.log('Navigate to shop');
+  }
+
+  onLearnMore() {
+    console.log('Learn more about collection');
+  }
 }

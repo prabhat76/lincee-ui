@@ -1,85 +1,361 @@
-<div class="account-container" *ngIf="!isLoading(); else loadingTemplate">
-  <div class="account-header">
-    <h1>My Account</h1>
-    <button class="logout-btn" (click)="logout()">Logout</button>
-  </div>
+<div class="account-wrapper">
+  <div class="account-container" *ngIf="!isLoading(); else loadingTemplate">
+    <div class="account-header">
+      <div class="header-left">
+        <h1>My Account</h1>
+        <p class="welcome-text" *ngIf="user()">Welcome back, {{ user().firstName || user().username }}!</p>
+      </div>
+      <div class="header-actions">
+        <button mat-raised-button color="primary" *ngIf="userRole === 'ADMIN'" (click)="navigateToAdmin()">
+          <mat-icon>admin_panel_settings</mat-icon>
+          Admin Panel
+        </button>
+        <button mat-stroked-button class="logout-btn" (click)="logout()">
+          <mat-icon>logout</mat-icon>
+          Logout
+        </button>
+      </div>
+    </div>
 
-  <div class="account-tabs">
-    <button
-      class="tab-btn"
-      [class.active]="activeTab() === 'profile'"
-      (click)="setActiveTab('profile')"
-    >
-      Profile
-    </button>
-    <button
-      class="tab-btn"
-      [class.active]="activeTab() === 'orders'"
-      (click)="setActiveTab('orders')"
-    >
-      Orders
-    </button>
-    <button
-      class="tab-btn"
-      [class.active]="activeTab() === 'addresses'"
-      (click)="setActiveTab('addresses')"
-    >
-      Addresses
-    </button>
-  </div>
+    <mat-tab-group [(selectedIndex)]="activeTab" animationDuration="300ms">
+      <!-- Profile Tab -->
+      <mat-tab label="Profile">
+        <div class="tab-content">
+          <mat-card class="profile-card">
+            <mat-card-header>
+              <mat-card-title>
+                <div class="card-title-row">
+                  <span>Profile Information</span>
+                  <button mat-icon-button color="primary" (click)="toggleEditProfile()" *ngIf="!isEditingProfile()">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                </div>
+              </mat-card-title>
+            </mat-card-header>
 
-  <div class="account-content">
-    <div *ngIf="activeTab() === 'profile'" class="tab-panel">
-      <div class="profile-card">
-        <h2>Profile Information</h2>
-        <div class="profile-info" *ngIf="user()">
-          <div class="info-row">
-            <label>Username:</label>
-            <span>{{ user().username }}</span>
+            <mat-card-content>
+              <div *ngIf="!isEditingProfile(); else editProfileTemplate" class="profile-view">
+                <div class="info-grid">
+                  <div class="info-item">
+                    <mat-icon class="info-icon">person</mat-icon>
+                    <div class="info-content">
+                      <label>Full Name</label>
+                      <span>{{ user()?.firstName }} {{ user()?.lastName }}</span>
+                    </div>
+                  </div>
+
+                  <div class="info-item">
+                    <mat-icon class="info-icon">email</mat-icon>
+                    <div class="info-content">
+                      <label>Email Address</label>
+                      <span>{{ user()?.email }}</span>
+                    </div>
+                  </div>
+
+                  <div class="info-item" *ngIf="user()?.phoneNumber">
+                    <mat-icon class="info-icon">phone</mat-icon>
+                    <div class="info-content">
+                      <label>Phone Number</label>
+                      <span>{{ user()?.phoneNumber }}</span>
+                    </div>
+                  </div>
+
+                  <div class="info-item">
+                    <mat-icon class="info-icon">badge</mat-icon>
+                    <div class="info-content">
+                      <label>Account Role</label>
+                      <span class="role-badge" [class.admin-badge]="user()?.role === 'ADMIN'">
+                        {{ user()?.role }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div class="info-item">
+                    <mat-icon class="info-icon">calendar_today</mat-icon>
+                    <div class="info-content">
+                      <label>Member Since</label>
+                      <span>{{ user()?.createdAt | date: 'MMM d, yyyy' }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <ng-template #editProfileTemplate>
+                <form [formGroup]="profileForm" (ngSubmit)="onProfileSubmit()" class="profile-form">
+                  <div class="form-row">
+                    <mat-form-field appearance="outline" class="form-field">
+                      <mat-label>First Name</mat-label>
+                      <input matInput formControlName="firstName" placeholder="Enter first name" />
+                      <mat-icon matPrefix>person</mat-icon>
+                      <mat-error *ngIf="profileForm.get('firstName')?.hasError('required')">
+                        First name is required
+                      </mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="form-field">
+                      <mat-label>Last Name</mat-label>
+                      <input matInput formControlName="lastName" placeholder="Enter last name" />
+                      <mat-icon matPrefix>person</mat-icon>
+                      <mat-error *ngIf="profileForm.get('lastName')?.hasError('required')">
+                        Last name is required
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+
+                  <mat-form-field appearance="outline" class="form-field-full">
+                    <mat-label>Email Address</mat-label>
+                    <input matInput formControlName="email" type="email" placeholder="Enter email" />
+                    <mat-icon matPrefix>email</mat-icon>
+                    <mat-error *ngIf="profileForm.get('email')?.hasError('required')">
+                      Email is required
+                    </mat-error>
+                    <mat-error *ngIf="profileForm.get('email')?.hasError('email')">
+                      Please enter a valid email
+                    </mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field-full">
+                    <mat-label>Phone Number</mat-label>
+                    <input matInput formControlName="phoneNumber" placeholder="10-digit phone number" />
+                    <mat-icon matPrefix>phone</mat-icon>
+                    <mat-error *ngIf="profileForm.get('phoneNumber')?.hasError('pattern')">
+                      Please enter a valid 10-digit phone number
+                    </mat-error>
+                  </mat-form-field>
+
+                  <div class="form-actions">
+                    <button mat-raised-button color="primary" type="submit" [disabled]="profileForm.invalid || isLoading()">
+                      <mat-icon>save</mat-icon>
+                      Save Changes
+                    </button>
+                    <button mat-stroked-button type="button" (click)="toggleEditProfile()">
+                      <mat-icon>cancel</mat-icon>
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </ng-template>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- Addresses Tab -->
+      <mat-tab label="Addresses">
+        <div class="tab-content">
+          <div class="section-header">
+            <h2>Saved Addresses</h2>
+            <button mat-raised-button color="primary" (click)="openAddressForm()" *ngIf="!isEditingAddress() && editingAddressId() === null">
+              <mat-icon>add</mat-icon>
+              Add New Address
+            </button>
           </div>
-          <div class="info-row">
-            <label>Email:</label>
-            <span>{{ user().email }}</span>
+
+          <!-- Add/Edit Address Form -->
+          <mat-card class="address-form-card" *ngIf="isEditingAddress() || editingAddressId() !== null || addresses().length === 0">
+            <mat-card-header>
+              <mat-card-title>{{ editingAddressId() !== null ? 'Edit Address' : 'Add New Address' }}</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <form [formGroup]="addressForm" (ngSubmit)="onAddressSubmit()" class="address-form">
+                <mat-form-field appearance="outline" class="form-field-full">
+                  <mat-label>Street Address</mat-label>
+                  <input matInput formControlName="street" placeholder="Enter street address" />
+                  <mat-icon matPrefix>home</mat-icon>
+                  <mat-error>Street address is required</mat-error>
+                </mat-form-field>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>City</mat-label>
+                    <input matInput formControlName="city" placeholder="Enter city" />
+                    <mat-icon matPrefix>location_city</mat-icon>
+                    <mat-error>City is required</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>State</mat-label>
+                    <input matInput formControlName="state" placeholder="Enter state" />
+                    <mat-icon matPrefix>map</mat-icon>
+                    <mat-error>State is required</mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>ZIP Code</mat-label>
+                    <input matInput formControlName="zipCode" placeholder="Enter ZIP code" />
+                    <mat-icon matPrefix>markunread_mailbox</mat-icon>
+                    <mat-error>Valid ZIP code is required</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field">
+                    <mat-label>Country</mat-label>
+                    <input matInput formControlName="country" placeholder="Enter country" />
+                    <mat-icon matPrefix>public</mat-icon>
+                    <mat-error>Country is required</mat-error>
+                  </mat-form-field>
+                </div>
+
+                <mat-form-field appearance="outline" class="form-field-full">
+                  <mat-label>Address Type</mat-label>
+                  <mat-select formControlName="addressType">
+                    <mat-option value="SHIPPING">Shipping Address</mat-option>
+                    <mat-option value="BILLING">Billing Address</mat-option>
+                    <mat-option value="BOTH">Both Shipping & Billing</mat-option>
+                  </mat-select>
+                  <mat-icon matPrefix>category</mat-icon>
+                </mat-form-field>
+
+                <div class="checkbox-group">
+                  <label class="checkbox-label">
+                    <input type="checkbox" formControlName="isDefault" />
+                    <span>Set as default address</span>
+                  </label>
+                </div>
+
+                <div class="form-actions">
+                  <button mat-raised-button color="primary" type="submit" [disabled]="addressForm.invalid || isLoading()">
+                    <mat-icon>save</mat-icon>
+                    {{ editingAddressId() !== null ? 'Update Address' : 'Add Address' }}
+                  </button>
+                  <button mat-stroked-button type="button" (click)="cancelAddressForm()" *ngIf="addresses().length > 0">
+                    <mat-icon>cancel</mat-icon>
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Address List -->
+          <div class="addresses-grid" *ngIf="addresses().length > 0">
+            <mat-card class="address-card" *ngFor="let address of addresses()">
+              <mat-card-content>
+                <div class="address-header">
+                  <div class="address-type-badge" [class.default-badge]="address.isDefault">
+                    <mat-icon>{{ address.addressType === 'SHIPPING' ? 'local_shipping' : address.addressType === 'BILLING' ? 'payment' : 'home' }}</mat-icon>
+                    <span>{{ address.addressType }}</span>
+                  </div>
+                  <span class="default-tag" *ngIf="address.isDefault">Default</span>
+                </div>
+
+                <div class="address-details">
+                  <p class="street">{{ address.street }}</p>
+                  <p class="city-state">{{ address.city }}, {{ address.state }} {{ address.zipCode }}</p>
+                  <p class="country">{{ address.country }}</p>
+                </div>
+
+                <div class="address-actions">
+                  <button mat-button color="primary" (click)="openAddressForm(address)">
+                    <mat-icon>edit</mat-icon>
+                    Edit
+                  </button>
+                  <button mat-button color="warn" (click)="deleteAddress(address.id)">
+                    <mat-icon>delete</mat-icon>
+                    Delete
+                  </button>
+                </div>
+              </mat-card-content>
+            </mat-card>
           </div>
-          <div class="info-row" *ngIf="user().firstName">
-            <label>First Name:</label>
-            <span>{{ user().firstName }}</span>
-          </div>
-          <div class="info-row" *ngIf="user().lastName">
-            <label>Last Name:</label>
-            <span>{{ user().lastName }}</span>
-          </div>
-          <div class="info-row" *ngIf="user().phone">
-            <label>Phone:</label>
-            <span>{{ user().phone }}</span>
-          </div>
-          <div class="info-row">
-            <label>Account Created:</label>
-            <span>{{ user().createdAt | date: 'MMM d, yyyy' }}</span>
+
+          <div class="empty-state" *ngIf="addresses().length === 0 && !isEditingAddress() && editingAddressId() === null">
+            <mat-icon>location_off</mat-icon>
+            <p>No addresses saved yet</p>
+            <button mat-raised-button color="primary" (click)="openAddressForm()">
+              <mat-icon>add</mat-icon>
+              Add Your First Address
+            </button>
           </div>
         </div>
-      </div>
-    </div>
+      </mat-tab>
 
-    <div *ngIf="activeTab() === 'orders'" class="tab-panel">
-      <div class="section-card">
-        <h2>Order History</h2>
-        <p class="empty-state">Your order history will appear here</p>
-      </div>
-    </div>
+      <!-- Orders Tab -->
+      <mat-tab label="Orders">
+        <div class="tab-content">
+          <h2>Order History</h2>
 
-    <div *ngIf="activeTab() === 'addresses'" class="tab-panel">
-      <div class="section-card">
-        <h2>Saved Addresses</h2>
-        <p class="empty-state">No saved addresses yet</p>
-      </div>
-    </div>
+          <div class="orders-list" *ngIf="orders().length > 0">
+            <mat-card class="order-card" *ngFor="let order of orders()">
+              <mat-card-header>
+                <mat-card-title>
+                  <div class="order-header">
+                    <div class="order-info">
+                      <span class="order-number">Order #{{ order.orderNumber || order.id }}</span>
+                      <span class="order-date">{{ order.createdAt | date: 'MMM d, yyyy h:mm a' }}</span>
+                    </div>
+                    <span class="order-status" [ngClass]="getOrderStatusClass(order.status)">
+                      {{ order.status }}
+                    </span>
+                  </div>
+                </mat-card-title>
+              </mat-card-header>
+
+              <mat-card-content>
+                <div class="order-details">
+                  <div class="order-items" *ngIf="order.orderItems && order.orderItems.length > 0">
+                    <div class="order-item" *ngFor="let item of order.orderItems">
+                      <div class="item-info">
+                        <span class="item-name">{{ item.product?.name || item.productName }}</span>
+                        <span class="item-quantity">Qty: {{ item.quantity }}</span>
+                      </div>
+                      <span class="item-price">${{ item.price?.toFixed(2) }}</span>
+                    </div>
+                  </div>
+
+                  <div class="order-summary">
+                    <div class="summary-row">
+                      <span>Subtotal:</span>
+                      <span>${{ order.totalAmount?.toFixed(2) }}</span>
+                    </div>
+                    <div class="summary-row total">
+                      <span>Total:</span>
+                      <span>${{ order.totalAmount?.toFixed(2) }}</span>
+                    </div>
+                  </div>
+
+                  <div class="shipping-info" *ngIf="order.shippingAddress">
+                    <mat-icon>local_shipping</mat-icon>
+                    <div>
+                      <strong>Shipping Address:</strong>
+                      <p>{{ order.shippingAddress }}</p>
+                    </div>
+                  </div>
+                </div>
+              </mat-card-content>
+
+              <mat-card-actions>
+                <button mat-button color="primary">
+                  <mat-icon>receipt</mat-icon>
+                  View Details
+                </button>
+                <button mat-button *ngIf="order.status === 'DELIVERED'">
+                  <mat-icon>star</mat-icon>
+                  Write Review
+                </button>
+              </mat-card-actions>
+            </mat-card>
+          </div>
+
+          <div class="empty-state" *ngIf="orders().length === 0">
+            <mat-icon>shopping_bag</mat-icon>
+            <p>No orders yet</p>
+            <p class="sub-text">Start shopping to see your orders here</p>
+            <button mat-raised-button color="primary" routerLink="/products">
+              <mat-icon>shopping_cart</mat-icon>
+              Start Shopping
+            </button>
+          </div>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
   </div>
+
+  <ng-template #loadingTemplate>
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <p>Loading your account...</p>
+    </div>
+  </ng-template>
 </div>
-
-<ng-template #loadingTemplate>
-  <div class="loading-container">
-    <div class="spinner"></div>
-    <p>Loading your account...</p>
-  </div>
-</ng-template>

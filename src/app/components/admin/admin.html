@@ -1,13 +1,18 @@
 <div class="admin-container">
   <div class="admin-header">
     <div class="admin-title">
-      <h1>Admin Portal</h1>
-      <p>Manage products and inventory</p>
+      <h1>Admin Dashboard</h1>
+      <p>Manage products, collections, and orders</p>
     </div>
-    <button mat-raised-button color="warn" (click)="logout()" class="logout-btn">
-      <mat-icon>logout</mat-icon>
-      Logout
-    </button>
+    <div class="header-actions">
+      <button mat-icon-button (click)="toggleTheme()" class="theme-toggle" [matTooltip]="isDarkMode() ? 'Switch to Light Mode' : 'Switch to Dark Mode'">
+        <mat-icon>{{ isDarkMode() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+      </button>
+      <button mat-raised-button color="warn" (click)="logout()" class="logout-btn">
+        <mat-icon>logout</mat-icon>
+        Logout
+      </button>
+    </div>
   </div>
 
   <div class="admin-content">
@@ -120,6 +125,21 @@
             </mat-card-header>
 
             <mat-card-content>
+              <!-- Search Bar -->
+              <div class="search-bar">
+                <mat-form-field class="search-field">
+                  <mat-label>Search Products</mat-label>
+                  <input matInput [(ngModel)]="searchQuery" (keyup.enter)="searchProducts()" placeholder="Search by name, category, or brand..." />
+                  <button mat-icon-button matSuffix (click)="searchProducts()">
+                    <mat-icon>search</mat-icon>
+                  </button>
+                </mat-form-field>
+                <button mat-stroked-button *ngIf="searchQuery()" (click)="clearSearch()">
+                  <mat-icon>clear</mat-icon>
+                  Clear
+                </button>
+              </div>
+
               <div class="table-container">
                 <table mat-table [dataSource]="products()" class="products-table">
                   <!-- ID Column -->
@@ -162,6 +182,9 @@
                   <ng-container matColumnDef="actions">
                     <th mat-header-cell *matHeaderCellDef>Actions</th>
                     <td mat-cell *matCellDef="let element">
+                      <button mat-icon-button color="accent" (click)="viewProductDetails(element)" title="View Details">
+                        <mat-icon>visibility</mat-icon>
+                      </button>
                       <button mat-icon-button color="primary" (click)="editProduct(element)" title="Edit">
                         <mat-icon>edit</mat-icon>
                       </button>
@@ -185,6 +208,162 @@
         </div>
       </mat-tab>
 
+      <!-- Collections Tab -->
+      <mat-tab label="Collections">
+        <div class="tab-content">
+          <!-- Collection Form Card -->
+          <mat-card class="product-form-card" style="margin-bottom: 24px;">
+            <mat-card-header>
+              <mat-card-title>
+                {{ isEditCollectionMode() ? 'Edit Collection' : 'Add New Collection' }}
+              </mat-card-title>
+            </mat-card-header>
+
+            <mat-card-content>
+              <form [formGroup]="collectionForm" (ngSubmit)="onCollectionSubmit()" class="product-form">
+                <div class="form-row">
+                  <mat-form-field class="form-field">
+                    <mat-label>Collection Name</mat-label>
+                    <input matInput formControlName="name" (blur)="generateSlug()" placeholder="e.g., Summer Collection" />
+                  </mat-form-field>
+
+                  <mat-form-field class="form-field">
+                    <mat-label>Slug (URL-friendly)</mat-label>
+                    <input matInput formControlName="slug" placeholder="e.g., summer-collection" />
+                  </mat-form-field>
+                </div>
+
+                <mat-form-field class="form-field-full">
+                  <mat-label>Description</mat-label>
+                  <textarea matInput formControlName="description" rows="3" 
+                    placeholder="Brief description of the collection"></textarea>
+                </mat-form-field>
+
+                <div class="form-row">
+                  <mat-form-field class="form-field">
+                    <mat-label>Image URL</mat-label>
+                    <input matInput formControlName="imageUrl" placeholder="https://example.com/image.jpg" />
+                  </mat-form-field>
+
+                  <mat-form-field class="form-field">
+                    <mat-label>Display Order</mat-label>
+                    <input matInput type="number" formControlName="displayOrder" placeholder="0" />
+                  </mat-form-field>
+                </div>
+
+                <div class="checkbox-group">
+                  <label class="checkbox-label">
+                    <input type="checkbox" formControlName="active" />
+                    <span>Active (visible to customers)</span>
+                  </label>
+                  <label class="checkbox-label">
+                    <input type="checkbox" formControlName="featured" />
+                    <span>Featured Collection</span>
+                  </label>
+                </div>
+
+                <div class="form-actions">
+                  <button mat-raised-button color="primary" type="submit" [disabled]="isLoading() || collectionForm.invalid">
+                    <span *ngIf="!isLoading()">{{ isEditCollectionMode() ? 'Update Collection' : 'Create Collection' }}</span>
+                    <span *ngIf="isLoading()">Saving...</span>
+                  </button>
+                  <button mat-stroked-button type="button" (click)="resetCollectionForm()" [disabled]="isLoading()">
+                    Clear
+                  </button>
+                </div>
+              </form>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Collections List Card -->
+          <mat-card class="products-card">
+            <mat-card-header>
+              <mat-card-title>Collections</mat-card-title>
+              <mat-card-subtitle>Total Collections: {{ collections().length }}</mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-card-content>
+              <div class="table-container">
+                <table mat-table [dataSource]="collections()" class="products-table">
+                  <!-- ID Column -->
+                  <ng-container matColumnDef="id">
+                    <th mat-header-cell *matHeaderCellDef>ID</th>
+                    <td mat-cell *matCellDef="let element">{{ element.id }}</td>
+                  </ng-container>
+
+                  <!-- Name Column -->
+                  <ng-container matColumnDef="name">
+                    <th mat-header-cell *matHeaderCellDef>Collection Name</th>
+                    <td mat-cell *matCellDef="let element">{{ element.name }}</td>
+                  </ng-container>
+
+                  <!-- Slug Column -->
+                  <ng-container matColumnDef="slug">
+                    <th mat-header-cell *matHeaderCellDef>Slug</th>
+                    <td mat-cell *matCellDef="let element">{{ element.slug }}</td>
+                  </ng-container>
+
+                  <!-- Product Count Column -->
+                  <ng-container matColumnDef="productCount">
+                    <th mat-header-cell *matHeaderCellDef>Products</th>
+                    <td mat-cell *matCellDef="let element">
+                      <span class="product-count-badge">{{ element.productCount }}</span>
+                    </td>
+                  </ng-container>
+
+                  <!-- Featured Column -->
+                  <ng-container matColumnDef="featured">
+                    <th mat-header-cell *matHeaderCellDef>Featured</th>
+                    <td mat-cell *matCellDef="let element">
+                      <mat-icon class="status-icon" [class.featured]="element.featured">
+                        {{ element.featured ? 'star' : 'star_border' }}
+                      </mat-icon>
+                    </td>
+                  </ng-container>
+
+                  <!-- Active Column -->
+                  <ng-container matColumnDef="active">
+                    <th mat-header-cell *matHeaderCellDef>Status</th>
+                    <td mat-cell *matCellDef="let element">
+                      <span [class.active-badge]="element.active" [class.inactive-badge]="!element.active">
+                        {{ element.active ? 'Active' : 'Inactive' }}
+                      </span>
+                    </td>
+                  </ng-container>
+
+                  <!-- Actions Column -->
+                  <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef>Actions</th>
+                    <td mat-cell *matCellDef="let element">
+                      <button mat-icon-button color="accent" (click)="viewCollectionDetails(element)" title="View Details">
+                        <mat-icon>visibility</mat-icon>
+                      </button>
+                      <button mat-icon-button color="primary" (click)="manageCollectionProducts(element)" title="Manage Products">
+                        <mat-icon>inventory_2</mat-icon>
+                      </button>
+                      <button mat-icon-button (click)="editCollection(element)" title="Edit" style="color: #d4af37;">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                      <button mat-icon-button color="warn" (click)="deleteCollection(element.id, element.name)" title="Delete">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="collectionColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: collectionColumns;"></tr>
+                </table>
+              </div>
+
+              <div class="empty-state" *ngIf="collections().length === 0">
+                <mat-icon>collections</mat-icon>
+                <p>No collections yet. Create your first collection using the form above.</p>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
       <!-- Statistics Tab -->
       <mat-tab label="Statistics">
         <div class="tab-content">
@@ -195,17 +374,17 @@
             </mat-card>
 
             <mat-card class="stat-card">
-              <div class="stat-value">{{ products().filter(p => p.stock > 0).length }}</div>
+              <div class="stat-value">{{ getInStockCount() }}</div>
               <div class="stat-label">In Stock</div>
             </mat-card>
 
             <mat-card class="stat-card">
-              <div class="stat-value">{{ products().filter(p => p.stock === 0).length }}</div>
+              <div class="stat-value">{{ getOutOfStockCount() }}</div>
               <div class="stat-label">Out of Stock</div>
             </mat-card>
 
             <mat-card class="stat-card">
-              <div class="stat-value">${{ (products().reduce((sum, p) => sum + (p.price || 0), 0)).toFixed(2) }}</div>
+              <div class="stat-value">${{ getTotalInventoryValue() }}</div>
               <div class="stat-label">Total Inventory Value</div>
             </mat-card>
           </div>
@@ -218,7 +397,7 @@
               <div class="category-stats">
                 <div class="category-stat" *ngFor="let cat of categories">
                   <span class="category-name">{{ cat }}</span>
-                  <span class="category-count">{{ products().filter(p => p.category === cat).length }}</span>
+                  <span class="category-count">{{ getCategoryCount(cat) }}</span>
                 </div>
               </div>
             </mat-card-content>
@@ -226,5 +405,232 @@
         </div>
       </mat-tab>
     </mat-tab-group>
+  </div>
+</div>
+
+<!-- Product Details Modal -->
+<div class="product-details-modal" *ngIf="showProductDetails()" (click)="closeProductDetails()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Product Details</h2>
+      <button mat-icon-button (click)="closeProductDetails()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    
+    <div class="modal-body" *ngIf="selectedProduct()">
+      <div class="product-image-section" *ngIf="selectedProduct().imageUrl">
+        <img [src]="selectedProduct().imageUrl" [alt]="selectedProduct().name" />
+      </div>
+      
+      <div class="product-info-grid">
+        <div class="info-item">
+          <span class="info-label">ID</span>
+          <span class="info-value">{{ selectedProduct().id }}</span>
+        </div>
+        
+        <div class="info-item">
+          <span class="info-label">Product Name</span>
+          <span class="info-value">{{ selectedProduct().name }}</span>
+        </div>
+        
+        <div class="info-item">
+          <span class="info-label">Brand</span>
+          <span class="info-value">{{ selectedProduct().brand }}</span>
+        </div>
+        
+        <div class="info-item">
+          <span class="info-label">Category</span>
+          <span class="info-value">
+            <span class="category-badge">{{ selectedProduct().category }}</span>
+          </span>
+        </div>
+        
+        <div class="info-item">
+          <span class="info-label">Price</span>
+          <span class="info-value price">${{ selectedProduct().price.toFixed(2) }}</span>
+        </div>
+        
+        <div class="info-item">
+          <span class="info-label">Stock Quantity</span>
+          <span class="info-value" [class.low-stock]="selectedProduct().stock < 10" [class.in-stock]="selectedProduct().stock >= 10">
+            {{ selectedProduct().stock }} units
+          </span>
+        </div>
+        
+        <div class="info-item full-width">
+          <span class="info-label">Description</span>
+          <span class="info-value">{{ selectedProduct().description }}</span>
+        </div>
+        
+        <div class="info-item" *ngIf="selectedProduct().sizes && selectedProduct().sizes.length > 0">
+          <span class="info-label">Available Sizes</span>
+          <span class="info-value">
+            <span class="size-badge" *ngFor="let size of selectedProduct().sizes">{{ size }}</span>
+          </span>
+        </div>
+        
+        <div class="info-item" *ngIf="selectedProduct().colors && selectedProduct().colors.length > 0">
+          <span class="info-label">Available Colors</span>
+          <span class="info-value">
+            <span class="color-badge" *ngFor="let color of selectedProduct().colors">{{ color }}</span>
+          </span>
+        </div>
+        
+        <div class="info-item">
+          <span class="info-label">Featured</span>
+          <span class="info-value">
+            <mat-icon class="status-icon" [class.featured]="selectedProduct().featured">
+              {{ selectedProduct().featured ? 'star' : 'star_border' }}
+            </mat-icon>
+            {{ selectedProduct().featured ? 'Yes' : 'No' }}
+          </span>
+        </div>
+      </div>
+      
+      <div class="modal-actions">
+        <button mat-raised-button color="primary" (click)="editProduct(selectedProduct()); closeProductDetails()">
+          <mat-icon>edit</mat-icon>
+          Edit Product
+        </button>
+        <button mat-stroked-button (click)="closeProductDetails()">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Collection Details Modal -->
+<div class="product-details-modal" *ngIf="showCollectionDetails()" (click)="closeCollectionDetails()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Collection Details</h2>
+      <button mat-icon-button (click)="closeCollectionDetails()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    
+    <div class="modal-body" *ngIf="selectedCollection()">
+      <div class="product-image-section" *ngIf="selectedCollection()!.imageUrl">
+        <img [src]="selectedCollection()!.imageUrl" [alt]="selectedCollection()!.name" />
+      </div>
+      
+      <div class="product-info-grid">
+        <div class="info-item">
+          <span class="info-label">ID</span>
+          <span class="info-value">{{ selectedCollection()!.id }}</span>
+        </div>
+        
+        <div class="info-item">
+          <span class="info-label">Collection Name</span>
+          <span class="info-value">{{ selectedCollection()!.name }}</span>
+        </div>
+        
+        <div class="info-item">
+          <span class="info-label">Slug</span>
+          <span class="info-value">{{ selectedCollection()!.slug }}</span>
+        </div>
+        
+        <div class="info-item">
+          <span class="info-label">Product Count</span>
+          <span class="info-value">{{ selectedCollection()!.productCount }} products</span>
+        </div>
+        
+        <div class="info-item full-width" *ngIf="selectedCollection()!.description">
+          <span class="info-label">Description</span>
+          <span class="info-value">{{ selectedCollection()!.description }}</span>
+        </div>
+        
+        <div class="info-item">
+          <span class="info-label">Display Order</span>
+          <span class="info-value">{{ selectedCollection()!.displayOrder }}</span>
+        </div>
+        
+        <div class="info-item">
+          <span class="info-label">Status</span>
+          <span class="info-value">
+            <span [class.active-badge]="selectedCollection()!.active" [class.inactive-badge]="!selectedCollection()!.active">
+              {{ selectedCollection()!.active ? 'Active' : 'Inactive' }}
+            </span>
+          </span>
+        </div>
+        
+        <div class="info-item">
+          <span class="info-label">Featured</span>
+          <span class="info-value">
+            <mat-icon class="status-icon" [class.featured]="selectedCollection()!.featured">
+              {{ selectedCollection()!.featured ? 'star' : 'star_border' }}
+            </mat-icon>
+            {{ selectedCollection()!.featured ? 'Yes' : 'No' }}
+          </span>
+        </div>
+        
+        <div class="info-item full-width" *ngIf="selectedCollection()!.products && selectedCollection()!.products!.length > 0">
+          <span class="info-label">Products in Collection</span>
+          <div class="product-chips">
+            <span class="product-chip" *ngFor="let product of selectedCollection()!.products">
+              {{ product.name }}
+            </span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-actions">
+        <button mat-raised-button color="primary" (click)="editCollection(selectedCollection()!); closeCollectionDetails()">
+          <mat-icon>edit</mat-icon>
+          Edit Collection
+        </button>
+        <button mat-stroked-button (click)="closeCollectionDetails()">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Manage Collection Products Modal -->
+<div class="product-details-modal" *ngIf="selectedCollection() && !showCollectionDetails()" (click)="selectedCollection.set(null)">
+  <div class="modal-content large-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Manage Products - {{ selectedCollection()!.name }}</h2>
+      <button mat-icon-button (click)="selectedCollection.set(null)">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    
+    <div class="modal-body">
+      <p class="modal-description">
+        Select products to add to this collection. Currently selected: {{ selectedProductIds().length }}
+      </p>
+      
+      <div class="products-grid">
+        <div class="product-card" *ngFor="let product of products()" 
+             [class.selected]="isProductSelected(product.id)"
+             (click)="toggleProductSelection(product.id)">
+          <div class="product-card-image" *ngIf="product.imageUrl">
+            <img [src]="product.imageUrl" [alt]="product.name" />
+          </div>
+          <div class="product-card-content">
+            <h4>{{ product.name }}</h4>
+            <p class="product-card-price">${{ product.price.toFixed(2) }}</p>
+            <span class="category-badge">{{ product.category }}</span>
+          </div>
+          <div class="product-card-overlay" *ngIf="isProductSelected(product.id)">
+            <mat-icon>check_circle</mat-icon>
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-actions">
+        <button mat-raised-button color="primary" (click)="saveCollectionProducts()" [disabled]="isLoading()">
+          <mat-icon>save</mat-icon>
+          Save Changes
+        </button>
+        <button mat-stroked-button (click)="selectedCollection.set(null)">
+          Cancel
+        </button>
+      </div>
+    </div>
   </div>
 </div>

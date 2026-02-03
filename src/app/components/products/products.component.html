@@ -12,11 +12,11 @@
     
     <div class="products-grid" *ngIf="!loading">
       <mat-card class="product-card animated-card" *ngFor="let product of products; let i = index" 
-            [class.featured]="product.isFeatured" [style.animationDelay]="(i * 80) + 'ms'">
+            [class.featured]="product.featured || product.isFeatured" [style.animationDelay]="(i * 80) + 'ms'">
         
         <div class="card-header">
-          <mat-chip-set *ngIf="product.isFeatured || i < 2">
-            <mat-chip class="featured-chip" *ngIf="product.isFeatured">FEATURED</mat-chip>
+          <mat-chip-set *ngIf="product.featured || product.isFeatured || i < 2">
+            <mat-chip class="featured-chip" *ngIf="product.featured || product.isFeatured">FEATURED</mat-chip>
             <mat-chip class="new-chip" *ngIf="i < 2">NEW</mat-chip>
           </mat-chip-set>
           <button mat-icon-button class="favorite-btn animated-fav">

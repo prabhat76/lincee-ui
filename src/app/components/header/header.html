@@ -1,15 +1,22 @@
+<!-- Top Banner -->
+<div class="top-banner">
+  <p>FREE SHIPPING ON ORDERS OVER $100</p>
+</div>
+
 <mat-toolbar class="header" color="primary">
   <div class="header-content">
     <div class="nav-brand">
-      <a routerLink="/" class="logo">LINCEE</a>
+      <a routerLink="/" class="logo-link">
+        <img src="https://www.lencii.com/static/media/lenciLogo.153e28daaa59e7c410e7.png" alt="Lencii" class="logo-image" />
+      </a>
     </div>
     
     <div class="nav-menu" [class.active]="isMenuOpen()">
       <a routerLink="/" class="nav-link" mat-button>HOME</a>
-      <a href="#" class="nav-link" mat-button>SHOP</a>
-      <a href="#" class="nav-link" mat-button>COLLECTIONS</a>
-      <a href="#" class="nav-link" mat-button>ABOUT</a>
-      <a href="#" class="nav-link" mat-button>CONTACT</a>
+      <a routerLink="/products" class="nav-link" mat-button>SHOP</a>
+      <a href="#collections" class="nav-link" mat-button>COLLECTIONS</a>
+      <a href="#about" class="nav-link" mat-button>ABOUT</a>
+      <a href="#contact" class="nav-link" mat-button>CONTACT</a>
     </div>
     
     <div class="nav-actions">
