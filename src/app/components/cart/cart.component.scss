@@ -3,6 +3,14 @@
   margin: 0 auto;
   padding: 80px 20px 40px;
   min-height: calc(100vh - 200px);
+  
+  @media (max-width: 768px) {
+    padding: 60px 16px 30px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 40px 12px 20px;
+  }
 }
 
 .cart-header {
@@ -10,7 +18,7 @@
   margin-bottom: 40px;
 
   h1 {
-    font-size: 2.5rem;
+    font-size: clamp(1.8rem, 5vw, 2.5rem);
     font-weight: 700;
     color: #1a1a1a;
     margin-bottom: 10px;
@@ -18,7 +26,11 @@
 
   p {
     color: #666;
-    font-size: 1.1rem;
+    font-size: clamp(0.95rem, 2vw, 1.1rem);
+  }
+  
+  @media (max-width: 480px) {
+    margin-bottom: 30px;
   }
 }
 
@@ -79,7 +91,14 @@
 
   @media (max-width: 768px) {
     grid-template-columns: 80px 1fr;
-    gap: 15px;
+    gap: 12px;
+    padding: 16px;
+  }
+  
+  @media (max-width: 480px) {
+    grid-template-columns: 70px 1fr;
+    gap: 10px;
+    padding: 12px;
   }
 
   .item-image {
@@ -227,6 +246,19 @@
     padding: 30px;
     position: sticky;
     top: 100px;
+    
+    @media (max-width: 1024px) {
+      position: static;
+      margin-top: 30px;
+    }
+    
+    @media (max-width: 768px) {
+      padding: 20px;
+    }
+    
+    @media (max-width: 480px) {
+      padding: 16px;
+    }
 
     h2 {
       font-size: 1.5rem;

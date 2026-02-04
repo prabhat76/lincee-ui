@@ -54,15 +54,25 @@ export class CartComponent implements OnInit {
   }
 
   updateQuantity(productId: number, newQuantity: number, size?: string) {
+    if (newQuantity <= 0) {
+      this.removeItem(productId, size);
+      return;
+    }
+
     const item = this.cartItems().find(
       i => i.product.id === productId && i.size === size
     );
     
     if (item && newQuantity > item.product.stockQuantity) {
       this.snackBar.open(
-        `Only ${item.product.stockQuantity} items available in stock`,
+        `⚠️ Only ${item.product.stockQuantity} items available in stock`,
         'OK',
-        { duration: 3000 }
+        {
+          duration: 3000,
+          horizontalPosition: 'end',
+          verticalPosition: 'top',
+          panelClass: ['snackbar-info']
+        }
       );
       return;
     }
@@ -72,15 +82,25 @@ export class CartComponent implements OnInit {
 
   removeItem(productId: number, size?: string) {
     this.cartService.removeFromCart(productId, size);
-    this.snackBar.open('Item removed from cart', 'OK', { duration: 2000 });
+    this.snackBar.open('✓ Item removed from cart', 'UNDO', {
+      duration: 3000,
+      horizontalPosition: 'end',
+      verticalPosition: 'top',
+      panelClass: ['snackbar-info']
+    });
   }
 
   incrementQuantity(item: CartItem) {
     if (item.quantity >= item.product.stockQuantity) {
       this.snackBar.open(
-        `Maximum stock of ${item.product.stockQuantity} reached`,
+        `⚠️ Maximum stock of ${item.product.stockQuantity} reached`,
         'OK',
-        { duration: 3000 }
+        {
+          duration: 3000,
+          horizontalPosition: 'end',
+          verticalPosition: 'top',
+          panelClass: ['snackbar-info']
+        }
       );
       return;
     }
@@ -96,21 +116,29 @@ export class CartComponent implements OnInit {
   }
 
   clearCart() {
-    if (confirm('Are you sure you want to clear your cart?')) {
+    if (confirm('⚠️ Are you sure you want to remove all items from your cart?')) {
       this.cartService.clearCart();
-      this.snackBar.open('Cart cleared', 'OK', { duration: 2000 });
+      this.snackBar.open('✓ Cart cleared successfully', 'OK', {
+        duration: 2500,
+        horizontalPosition: 'end',
+        verticalPosition: 'top',
+        panelClass: ['snackbar-success']
+      });
     }
   }
 
   continueShopping() {
-    this.router.navigate(['/']);
+    this.router.navigate(['/products']);
   }
 
   proceedToCheckout() {
     const token = localStorage.getItem('authToken') || localStorage.getItem('token');
     if (!token) {
-      this.snackBar.open('Please login to proceed to checkout', 'Login', {
-        duration: 3000
+      this.snackBar.open('🔒 Please login to proceed to checkout', 'LOGIN', {
+        duration: 4000,
+        horizontalPosition: 'end',
+        verticalPosition: 'top',
+        panelClass: ['snackbar-info']
       }).onAction().subscribe(() => {
         this.router.navigate(['/login'], { queryParams: { returnUrl: '/checkout' } });
       });
@@ -124,9 +152,14 @@ export class CartComponent implements OnInit {
 
     if (outOfStockItems.length > 0) {
       this.snackBar.open(
-        'Some items are out of stock. Please update quantities.',
+        '❌ Some items exceed available stock. Please update quantities.',
         'OK',
-        { duration: 4000 }
+        {
+          duration: 4000,
+          horizontalPosition: 'end',
+          verticalPosition: 'top',
+          panelClass: ['snackbar-error']
+        }
       );
       return;
     }

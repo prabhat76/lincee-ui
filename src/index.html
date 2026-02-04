@@ -17,7 +17,33 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  
+  <style>
+    /* Root level fix - prevent ALL text clipping */
+    *, *::before, *::after {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
+    
+    /* Ensure Material Icons render correctly */
+    .material-icons {
+      font-family: 'Material Icons' !important;
+      font-weight: normal !important;
+      font-style: normal !important;
+      font-size: 24px !important;
+      display: inline-block !important;
+      line-height: 1 !important;
+      text-transform: none !important;
+      letter-spacing: normal !important;
+      word-wrap: normal !important;
+      white-space: nowrap !important;
+      direction: ltr !important;
+      -webkit-font-feature-settings: 'liga' !important;
+      font-feature-settings: 'liga' !important;
+    }
+  </style>
   
   <!-- Open Graph Meta Tags -->
   <meta property="og:title" content="Lencii - Premium Streetwear & Fashion">

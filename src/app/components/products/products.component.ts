@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { ProductService, Product } from '../../services/product.service';
 import { CartService } from '../../services/cart.service';
 import { OnInit } from '@angular/core';
@@ -25,7 +26,8 @@ export class ProductsComponent implements OnInit {
   constructor(
     private productService: ProductService,
     private cartService: CartService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -56,17 +58,50 @@ export class ProductsComponent implements OnInit {
   }
 
   addToCart(product: Product) {
+    // Check stock availability
     if (product.stockQuantity <= 0) {
-      this.snackBar.open('This product is out of stock', 'OK', { duration: 3000 });
+      this.snackBar.open('❌ This product is out of stock', 'OK', {
+        duration: 3000,
+        horizontalPosition: 'end',
+        verticalPosition: 'top',
+        panelClass: ['snackbar-error']
+      });
       return;
     }
+
+    // Check if already in cart
+    const cartItems = this.cartService.getCartItems();
+    const existingItem = cartItems.find(item => item.product.id === product.id);
+    
+    if (existingItem && existingItem.quantity >= product.stockQuantity) {
+      this.snackBar.open(`⚠️ Maximum stock (${product.stockQuantity}) already in cart`, 'VIEW CART', {
+        duration: 4000,
+        horizontalPosition: 'end',
+        verticalPosition: 'top',
+        panelClass: ['snackbar-info']
+      }).onAction().subscribe(() => {
+        this.router.navigate(['/cart']);
+      });
+      return;
+    }
+
+    // Add to cart
     this.cartService.addToCart(product);
-    this.snackBar.open(`${product.name} added to cart`, 'VIEW CART', {
-      duration: 3000,
-      horizontalPosition: 'right',
-      verticalPosition: 'top'
-    }).onAction().subscribe(() => {
-      window.location.href = '/cart';
+    
+    // Show success message with actions
+    const snackBarRef = this.snackBar.open(
+      `✓ ${product.name} added to cart`,
+      'VIEW CART',
+      {
+        duration: 4000,
+        horizontalPosition: 'end',
+        verticalPosition: 'top',
+        panelClass: ['snackbar-success']
+      }
+    );
+
+    snackBarRef.onAction().subscribe(() => {
+      this.router.navigate(['/cart']);
     });
   }
 

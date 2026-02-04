@@ -202,23 +202,36 @@
 
 @media (max-width: 768px) {
   .hero {
-    height: 80vh;
+    height: calc(100vh - 94px);
+    min-height: 600px;
   }
   
   .hero-content {
     grid-template-columns: 1fr;
     gap: 40px;
-    padding: 0 24px;
+    padding: 0 20px;
     text-align: center;
   }
   
   .hero-text {
+    .collection-tag {
+      font-size: 0.75rem;
+      padding: 6px 12px;
+      margin-bottom: 16px;
+    }
+    
     .hero-title {
-      font-size: 2.5rem;
+      font-size: clamp(2rem, 8vw, 2.5rem);
     }
     
     .hero-subtitle {
-      font-size: 1.1rem;
+      font-size: clamp(1rem, 3vw, 1.1rem);
+      margin-bottom: 24px;
+    }
+    
+    .hero-cta .cta-btn {
+      padding: 14px 28px;
+      font-size: 0.95rem;
     }
   }
   
@@ -227,6 +240,10 @@
       max-width: 240px;
       height: 340px;
     }
+  }
+  
+  .hero-bottom {
+    bottom: 20px;
   }
 }
 

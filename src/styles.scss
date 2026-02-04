@@ -14,6 +14,10 @@ $color-border: #e0e0e0;            // Subtle Border
 $color-success: #4ecca3;
 $color-error: #d45454;
 
+// ============================================
+// ROOT LEVEL FIXES - Prevent Text Clipping
+// ============================================
+
 * {
   margin: 0;
   padding: 0;
@@ -22,6 +26,7 @@ $color-error: #d45454;
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 body {
@@ -29,11 +34,18 @@ body {
   line-height: 1.6;
   color: $color-text;
   background: $color-secondary;
-  letter-spacing: 0.3px;
+  letter-spacing: normal;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 main {
   padding-top: 114px; // Top banner (34px) + Header (80px)
+  
+  @media (max-width: 768px) {
+    padding-top: 94px; // Top banner (34px) + Mobile header (60px)
+  }
 }
 
 a {
@@ -48,6 +60,67 @@ button {
   cursor: pointer;
   font-family: inherit;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// ============================================
+// MATERIAL DESIGN COMPLETE RESET
+// ============================================
+
+// Force Material Icons to display correctly
+mat-icon,
+.mat-icon,
+.material-icons {
+  font-family: 'Material Icons' !important;
+  font-weight: normal !important;
+  font-style: normal !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: auto !important;
+  height: auto !important;
+  line-height: 1 !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  word-wrap: normal !important;
+  white-space: nowrap !important;
+  direction: ltr !important;
+  vertical-align: middle !important;
+  -webkit-font-smoothing: antialiased !important;
+  text-rendering: optimizeLegibility !important;
+  -moz-osx-font-smoothing: grayscale !important;
+  font-feature-settings: 'liga' !important;
+  -webkit-font-feature-settings: 'liga' !important;
+}
+
+// Fix Material buttons
+.mat-mdc-button,
+.mat-mdc-raised-button,
+.mat-mdc-outlined-button,
+.mat-mdc-unelevated-button,
+.mat-mdc-icon-button {
+  .mdc-button__label,
+  .mat-mdc-button-label {
+    width: auto !important;
+    max-width: none !important;
+    white-space: nowrap !important;
+    text-overflow: clip !important;
+  }
+}
+
+// Fix Material toolbar
+.mat-toolbar,
+.mat-mdc-toolbar {
+  width: 100% !important;
+  
+  * {
+    white-space: nowrap !important;
+  }
 }
 
 // Typography System
@@ -97,31 +170,61 @@ p {
   }
 }
 
-// Snackbar Styles
+// ============================================
+// SNACKBAR STYLES - Production Level
+// ============================================
+
+.mat-mdc-snack-bar-container {
+  --mdc-snackbar-container-color: #323232;
+  --mat-mdc-snack-bar-button-color: #fff;
+  margin: 8px !important;
+}
+
 .snackbar-success {
-  background: $color-success !important;
-  color: white !important;
+  --mdc-snackbar-container-color: #4ecca3 !important;
+  --mat-mdc-snack-bar-button-color: #fff !important;
   
-  .mat-mdc-snack-bar-label {
+  .mat-mdc-snack-bar-label,
+  .mdc-snackbar__label {
     color: white !important;
+    font-weight: 500 !important;
+  }
+  
+  .mat-mdc-button {
+    --mdc-text-button-label-text-color: #fff !important;
+    font-weight: 700 !important;
   }
 }
 
 .snackbar-error {
-  background: $color-error !important;
-  color: white !important;
+  --mdc-snackbar-container-color: #d45454 !important;
+  --mat-mdc-snack-bar-button-color: #fff !important;
   
-  .mat-mdc-snack-bar-label {
+  .mat-mdc-snack-bar-label,
+  .mdc-snackbar__label {
     color: white !important;
+    font-weight: 500 !important;
+  }
+  
+  .mat-mdc-button {
+    --mdc-text-button-label-text-color: #fff !important;
+    font-weight: 700 !important;
   }
 }
 
 .snackbar-info {
-  background: #2196F3 !important;
-  color: white !important;
+  --mdc-snackbar-container-color: #2196F3 !important;
+  --mat-mdc-snack-bar-button-color: #fff !important;
   
-  .mat-mdc-snack-bar-label {
+  .mat-mdc-snack-bar-label,
+  .mdc-snackbar__label {
     color: white !important;
+    font-weight: 500 !important;
+  }
+  
+  .mat-mdc-button {
+    --mdc-text-button-label-text-color: #fff !important;
+    font-weight: 700 !important;
   }
 }
 
@@ -198,4 +301,40 @@ p {
     background: $color-primary;
     margin: 20px auto 0;
   }
+}
+
+// Global Material Design Overrides - Fix Text Clipping
+.mat-mdc-button,
+.mat-mdc-raised-button,
+.mat-mdc-outlined-button,
+.mat-mdc-unelevated-button {
+  .mdc-button__label {
+    overflow: visible !important;
+    white-space: nowrap !important;
+    text-overflow: clip !important;
+  }
+}
+
+.mat-icon {
+  overflow: visible !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+span, a, button, div, p, h1, h2, h3, h4, h5, h6 {
+  overflow: visible !important;
+}
+
+// Additional Material overrides
+.mat-mdc-menu-item {
+  white-space: nowrap !important;
+  
+  .mat-mdc-menu-item-text {
+    white-space: nowrap !important;
+  }
+}
+
+.mat-badge-content {
+  white-space: nowrap !important;
 }

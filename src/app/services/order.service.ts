@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { CartItem } from './cart.service';
 import { API_CONFIG, getFullUrl } from '../config/api.config';
 
 export interface OrderRequest {
   userId: number;
+  totalAmount: number;
   shippingAddressId?: number;
   billingAddressId?: number;
   paymentMethodId?: number;
@@ -37,7 +38,13 @@ export class OrderService {
   constructor(private http: HttpClient) {}
 
   createOrder(orderRequest: OrderRequest): Observable<Order> {
-    return this.http.post<Order>(this.apiUrl, orderRequest);
+    const userId = orderRequest.userId;
+    const params = new HttpParams().set('userId', userId.toString());
+    
+    // Remove userId from body as it's sent as query param
+    const { userId: _, ...bodyWithoutUserId } = orderRequest;
+    
+    return this.http.post<Order>(this.apiUrl, bodyWithoutUserId, { params });
   }
 
   getOrderById(id: number): Observable<Order> {

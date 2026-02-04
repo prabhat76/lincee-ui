@@ -8,9 +8,17 @@ $color-accent: #d4af37;
 $color-success: #4ecca3;
 
 .products {
-  padding: 120px 0;
+  padding: 80px 0;
   background: $color-secondary;
   min-height: 100vh;
+  
+  @media (max-width: 768px) {
+    padding: 60px 0;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 40px 0;
+  }
 }
 
 .container {
@@ -32,6 +40,14 @@ $color-success: #4ecca3;
   text-align: center;
   margin-bottom: 80px;
   animation: fadeInDown 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  @media (max-width: 768px) {
+    margin-bottom: 50px;
+  }
+  
+  @media (max-width: 480px) {
+    margin-bottom: 40px;
+  }
   
   .section-title {
     font-size: clamp(2.2rem, 5vw, 3.5rem);

@@ -15,6 +15,11 @@ export class AddressService {
   }
 
   createAddress(data: any): Observable<any> {
+    const userId = localStorage.getItem('userId');
+    if (userId) {
+      const params = new HttpParams().set('userId', userId);
+      return this.http.post(this.baseUrl, data, { params });
+    }
     return this.http.post(this.baseUrl, data);
   }
 

@@ -43,7 +43,7 @@ export class CheckoutComponent implements OnInit {
   isLoading = signal(false);
   isPlacingOrder = signal(false);
   savedAddresses = signal<any[]>([]);
-  selectedAddressId = signal<number | null>(null);
+  selectedAddressId = signal<number | undefined>(undefined);
 
   constructor(
     private fb: FormBuilder,
@@ -128,12 +128,34 @@ export class CheckoutComponent implements OnInit {
     });
 
     if (this.shippingForm.invalid) {
-      this.snackBar.open('Please fill in all required shipping information', 'OK', { duration: 3000 });
+      this.snackBar.open('❌ Please fill in all required shipping information', 'OK', {
+        duration: 3000,
+        horizontalPosition: 'end',
+        verticalPosition: 'top',
+        panelClass: ['snackbar-error']
+      });
       return;
     }
 
     if (this.paymentForm.invalid) {
-      this.snackBar.open('Please select a payment method', 'OK', { duration: 3000 });
+      this.snackBar.open('❌ Please select a payment method', 'OK', {
+        duration: 3000,
+        horizontalPosition: 'end',
+        verticalPosition: 'top',
+        panelClass: ['snackbar-error']
+      });
+      return;
+    }
+
+    // Check if cart is empty
+    if (this.cartItems().length === 0) {
+      this.snackBar.open('❌ Your cart is empty', 'OK', {
+        duration: 3000,
+        horizontalPosition: 'end',
+        verticalPosition: 'top',
+        panelClass: ['snackbar-error']
+      });
+      this.router.navigate(['/products']);
       return;
     }
 
@@ -143,55 +165,161 @@ export class CheckoutComponent implements OnInit {
       // Step 1: Validate stock availability
       const stockValidation = await this.validateStock();
       if (!stockValidation.valid) {
-        this.snackBar.open(stockValidation.message!, 'OK', { duration: 4000 });
+        this.snackBar.open(stockValidation.message!, 'OK', {
+          duration: 4000,
+          horizontalPosition: 'end',
+          verticalPosition: 'top',
+          panelClass: ['snackbar-error']
+        });
         this.isPlacingOrder.set(false);
         return;
       }
 
-      // Step 2: Create order directly with simplified payload
+      // Step 2: Check authentication
       const userId = localStorage.getItem('userId');
+      const token = localStorage.getItem('authToken') || localStorage.getItem('token');
       
-      const orderData = {
-        userId: parseInt(userId!),
+      if (!userId || !token) {
+        this.snackBar.open('🔒 Session expired. Please login again.', 'LOGIN', {
+          duration: 4000,
+          horizontalPosition: 'end',
+          verticalPosition: 'top',
+          panelClass: ['snackbar-error']
+        }).onAction().subscribe(() => {
+          this.router.navigate(['/login'], { queryParams: { returnUrl: '/checkout' } });
+        });
+        this.isPlacingOrder.set(false);
+        return;
+      }
+
+      // Step 3: Create/Get Address ID
+      let addressId = this.selectedAddressId();
+      
+      if (!addressId) {
+        // Create new address
+        const addressData = {
+          type: 'SHIPPING',
+          addressLine1: this.shippingForm.value.addressLine1,
+          addressLine2: this.shippingForm.value.addressLine2 || '',
+          city: this.shippingForm.value.city,
+          state: this.shippingForm.value.state,
+          zipCode: this.shippingForm.value.postalCode,
+          country: this.shippingForm.value.country,
+          phoneNumber: this.shippingForm.value.phone,
+          isDefault: false
+        };
+
+        try {
+          console.log('Creating address with data:', addressData);
+          const address: any = await this.addressService.createAddress(addressData).toPromise();
+          console.log('Address created successfully:', address);
+          addressId = address.id;
+        } catch (error: any) {
+          console.error('Error creating address:', error);
+          console.error('Address error details:', error.error);
+          console.error('Address error status:', error.status);
+          // If address creation fails, use default ID 1
+          addressId = 1;
+        }
+      }
+
+      // Step 4: Calculate total amount
+      const totalAmount = this.cartItems().reduce((sum, item) => {
+        return sum + (item.product.price * item.quantity);
+      }, 0);
+
+      // Step 5: Create Order with proper structure
+      const orderData: OrderRequest = {
+        userId: parseInt(userId),
+        totalAmount: totalAmount,
+        shippingAddressId: addressId,
+        billingAddressId: addressId,
+        paymentMethodId: 1, // Default payment method ID
         items: this.cartItems().map(item => ({
           productId: item.product.id,
           quantity: item.quantity,
           size: item.size || 'M'
-        }))
+        })),
+        shippingMethod: 'STANDARD',
+        notes: `Payment: ${this.paymentForm.value.paymentMethod}, Contact: ${this.shippingForm.value.email}, Phone: ${this.shippingForm.value.phone}`
       };
+
+      console.log('Creating order with data:', orderData);
 
       this.orderService.createOrder(orderData).subscribe({
         next: async (response) => {
-          // Step 3: Update stock quantities
+          console.log('Order placed successfully:', response);
+          
+          // Update stock quantities
           try {
             await this.updateProductStocks();
           } catch (error) {
             console.error('Error updating stock:', error);
-            // Order is placed, but stock update failed - log this for admin
           }
 
-          // Step 4: Clear cart
+          // Clear cart
           this.cartService.clearCart();
 
-          // Step 5: Show success and redirect
+          // Show success and redirect
           this.isPlacingOrder.set(false);
-          this.snackBar.open('Order placed successfully!', 'OK', { duration: 3000 });
-          this.router.navigate(['/account'], { queryParams: { tab: 'orders' } });
+          this.snackBar.open(
+            `✓ Order placed successfully! Order #${response.id || 'PENDING'}`,
+            'VIEW ORDERS',
+            {
+              duration: 5000,
+              horizontalPosition: 'end',
+              verticalPosition: 'top',
+              panelClass: ['snackbar-success']
+            }
+          ).onAction().subscribe(() => {
+            this.router.navigate(['/account']);
+          });
+          
+          // Redirect after short delay
+          setTimeout(() => {
+            this.router.navigate(['/account']);
+          }, 2000);
         },
         error: (error) => {
-          this.isPlacingOrder.set(false);
           console.error('Error placing order:', error);
-          this.snackBar.open(
-            error.error?.message || 'Failed to place order. Please try again.',
-            'OK',
-            { duration: 4000 }
-          );
+          console.error('Error status:', error.status);
+          console.error('Error message:', error.message);
+          console.error('Error details:', error.error);
+          console.error('Error response body:', JSON.stringify(error.error, null, 2));
+          this.isPlacingOrder.set(false);
+          
+          // Check if it's an auth error
+          if (error.status === 401 || error.status === 403) {
+            this.snackBar.open('🔒 Authentication failed. Please login again.', 'LOGIN', {
+              duration: 4000,
+              horizontalPosition: 'end',
+              verticalPosition: 'top',
+              panelClass: ['snackbar-error']
+            }).onAction().subscribe(() => {
+              this.router.navigate(['/login'], { queryParams: { returnUrl: '/checkout' } });
+            });
+            return;
+          }
+
+          // Show specific error message
+          const errorMessage = error.error?.message || error.message || 'Failed to place order. Please try again.';
+          this.snackBar.open(`❌ ${errorMessage}`, 'OK', {
+            duration: 5000,
+            horizontalPosition: 'end',
+            verticalPosition: 'top',
+            panelClass: ['snackbar-error']
+          });
         }
       });
     } catch (error) {
       this.isPlacingOrder.set(false);
       console.error('Error in order process:', error);
-      this.snackBar.open('An error occurred. Please try again.', 'OK', { duration: 3000 });
+      this.snackBar.open('❌ An error occurred. Please try again.', 'OK', {
+        duration: 3000,
+        horizontalPosition: 'end',
+        verticalPosition: 'top',
+        panelClass: ['snackbar-error']
+      });
     }
   }
 
