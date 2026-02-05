@@ -1,16 +1,14 @@
 import { Routes } from '@angular/router';
-import { LoginComponent } from './components/login/login.component';
-import { AccountComponent } from './components/account/account.component';
-import { AdminComponent } from './components/admin/admin.component';
-import { CartComponent } from './components/cart/cart.component';
-import { CheckoutComponent } from './components/checkout/checkout.component';
-import { authGuard } from './guards/auth.guard';
-import { adminGuard } from './guards/admin.guard';
+import { HomeComponent } from './components/pages/home/home.component';
+// Import other page components as they are created
+// e.g., import { ShopComponent } from './components/pages/shop/shop.component';
 
 export const routes: Routes = [
-  { path: 'login', component: LoginComponent },
-  { path: 'account', component: AccountComponent, canActivate: [authGuard] },
-  { path: 'admin', component: AdminComponent, canActivate: [adminGuard] },
-  { path: 'cart', component: CartComponent },
-  { path: 'checkout', component: CheckoutComponent, canActivate: [authGuard] }
+  { path: '', component: HomeComponent },
+  // { path: 'shop', component: ShopComponent },
+  // { path: 'collections', component: CollectionsComponent },
+  // { path: 'about', component: AboutComponent },
+  // { path: 'account', component: AccountComponent },
+  // { path: 'cart', component: CartComponent },
+  { path: '**', redirectTo: '', pathMatch: 'full' } // Wildcard route
 ];

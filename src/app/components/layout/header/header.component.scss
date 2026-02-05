@@ -1,0 +1,97 @@
+:host {
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+}
+
+.header {
+  padding: var(--spacing-md) 0;
+  background-color: transparent;
+  transition: background-color var(--transition-duration-normal) ease,
+              padding var(--transition-duration-normal) ease;
+
+  &.scrolled {
+    background-color: var(--color-background);
+    padding: var(--spacing-sm) 0;
+    border-bottom: var(--border-width) solid var(--color-border);
+  }
+
+  &__wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  &__logo {
+    font-size: 1.5rem;
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--letter-spacing-wide);
+    text-transform: uppercase;
+    color: var(--color-text-heading);
+  }
+
+  &__nav {
+    @media (max-width: 768px) {
+      display: none; // Handle mobile menu separately
+    }
+  }
+
+  &__nav-list {
+    display: flex;
+    gap: var(--spacing-md);
+    list-style: none;
+  }
+
+  &__nav-link {
+    font-size: 0.9rem;
+    font-weight: var(--font-weight-medium);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    color: var(--color-secondary);
+    position: relative;
+    padding-bottom: 4px;
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background-color: var(--color-primary);
+      transition: width var(--transition-duration-normal) ease;
+    }
+
+    &:hover::after {
+      width: 100%;
+    }
+  }
+
+  &__right {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+  }
+
+  &__icon {
+    color: var(--color-primary);
+    .material-icons {
+      font-size: 24px;
+    }
+  }
+
+  &__menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--color-primary);
+    cursor: pointer;
+
+    @media (max-width: 768px) {
+      display: block;
+    }
+  }
+}

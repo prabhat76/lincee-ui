@@ -1,9 +1,0 @@
-<app-header></app-header>
-<main>
-  <router-outlet></router-outlet>
-  <ng-container *ngIf="!isLoginPage() && !isAccountPage()">
-    <app-hero></app-hero>
-    <app-products></app-products>
-  </ng-container>
-</main>
-<app-footer *ngIf="!isLoginPage() && !isAccountPage()"></app-footer>

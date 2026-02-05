@@ -1,340 +1,250 @@
-// ============================================
-// LINCEE STREETWEAR - Modern Luxury Theme
-// ============================================
+/*
+MODERN LUXURY FASHION E-COMMERCE
+DESIGN SYSTEM & GLOBAL STYLES
+*/
 
-// Color Palette - Luxury Streetwear
-$color-primary: #000;              // Pure Black
-$color-secondary: #fff;            // Pure White
-$color-accent: #d4af37;            // Gold Accent
-$color-dark: #0a0a0a;              // Near Black
-$color-light: #f5f5f5;             // Light Gray
-$color-text: #1a1a1a;              // Dark Text
-$color-text-light: #666;           // Medium Gray
-$color-border: #e0e0e0;            // Subtle Border
-$color-success: #4ecca3;
-$color-error: #d45454;
+// -----------------------------------------------------------------------------
+// #BASE
+// -----------------------------------------------------------------------------
 
-// ============================================
-// ROOT LEVEL FIXES - Prevent Text Clipping
-// ============================================
+// 1. CSS VARIABLES
+//    Using CSS variables for a flexible and consistent dark theme.
+//    Inspired by premium, minimalist aesthetics.
+// -----------------------------------------------------------------------------
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+:root {
+  // -- FONT FAMILY
+  --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+  --font-family-serif: 'Libre Baskerville', serif; // Example serif for editorial content
+
+  // -- TYPOGRAPHY
+  --font-weight-light: 300;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+
+  --letter-spacing-tight: -0.02em;
+  --letter-spacing-normal: 0.01em;
+  --letter-spacing-wide: 0.05em;
+
+  // -- COLOR PALETTE (Dark, Cinematic, Muted)
+  --color-background: #0a0a0a; // Deep, near-black for a cinematic feel
+  --color-surface: #121212;    // Charcoal for cards and surfaces
+  --color-primary: #ffffff;    // Off-white for primary actions and highlights
+  --color-secondary: #a0a0a0;  // Muted gray for secondary text and borders
+  --color-text: #e0e0e0;       // Soft white for body text
+  --color-text-heading: #ffffff; // Pure white for strong headings
+  --color-border: #2a2a2a;     // Subtle border color
+  --color-accent: #b8a07e;     // Muted gold/brass for a touch of luxury (use sparingly)
+
+  // -- SPACING & LAYOUT
+  --spacing-unit: 8px;
+  --spacing-xs: var(--spacing-unit);      // 8px
+  --spacing-sm: calc(var(--spacing-unit) * 2); // 16px
+  --spacing-md: calc(var(--spacing-unit) * 4); // 32px
+  --spacing-lg: calc(var(--spacing-unit) * 8); // 64px
+  --spacing-xl: calc(var(--spacing-unit) * 12); // 96px
+
+  // -- BORDERS & RADII
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+  --border-width: 1px;
+
+  // -- TRANSITIONS & ANIMATIONS
+  --transition-duration-slow: 0.8s;
+  --transition-duration-normal: 0.4s;
+  --transition-duration-fast: 0.2s;
+  --transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-html {
-  scroll-behavior: smooth;
-  overflow-x: hidden;
+
+// 2. GLOBAL RESETS & DEFAULTS
+//    Normalize styles for cross-browser consistency.
+// -----------------------------------------------------------------------------
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
 }
 
 body {
-  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  line-height: 1.6;
-  color: $color-text;
-  background: $color-secondary;
-  letter-spacing: normal;
-  overflow-x: hidden;
+  font-family: var(--font-family-sans);
+  background-color: var(--color-background);
+  color: var(--color-text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  line-height: 1.6;
+  font-weight: var(--font-weight-regular);
+  overflow-x: hidden;
 }
 
-main {
-  padding-top: 114px; // Top banner (34px) + Header (80px)
-  
-  @media (max-width: 768px) {
-    padding-top: 94px; // Top banner (34px) + Mobile header (60px)
-  }
-}
+// 3. TYPOGRAPHY
+//    Establish a strong, clear typographic hierarchy.
+// -----------------------------------------------------------------------------
 
-a {
-  text-decoration: none;
-  color: inherit;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-button {
-  border: none;
-  background: none;
-  cursor: pointer;
-  font-family: inherit;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-a {
-  text-decoration: none;
-  color: inherit;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-// ============================================
-// MATERIAL DESIGN COMPLETE RESET
-// ============================================
-
-// Force Material Icons to display correctly
-mat-icon,
-.mat-icon,
-.material-icons {
-  font-family: 'Material Icons' !important;
-  font-weight: normal !important;
-  font-style: normal !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: auto !important;
-  height: auto !important;
-  line-height: 1 !important;
-  text-transform: none !important;
-  letter-spacing: normal !important;
-  word-wrap: normal !important;
-  white-space: nowrap !important;
-  direction: ltr !important;
-  vertical-align: middle !important;
-  -webkit-font-smoothing: antialiased !important;
-  text-rendering: optimizeLegibility !important;
-  -moz-osx-font-smoothing: grayscale !important;
-  font-feature-settings: 'liga' !important;
-  -webkit-font-feature-settings: 'liga' !important;
-}
-
-// Fix Material buttons
-.mat-mdc-button,
-.mat-mdc-raised-button,
-.mat-mdc-outlined-button,
-.mat-mdc-unelevated-button,
-.mat-mdc-icon-button {
-  .mdc-button__label,
-  .mat-mdc-button-label {
-    width: auto !important;
-    max-width: none !important;
-    white-space: nowrap !important;
-    text-overflow: clip !important;
-  }
-}
-
-// Fix Material toolbar
-.mat-toolbar,
-.mat-mdc-toolbar {
-  width: 100% !important;
-  
-  * {
-    white-space: nowrap !important;
-  }
-}
-
-// Typography System
 h1, h2, h3, h4, h5, h6 {
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  margin-bottom: 12px;
+  font-family: var(--font-family-sans);
+  color: var(--color-text-heading);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.2;
+  letter-spacing: var(--letter-spacing-tight);
+  margin-bottom: var(--spacing-md);
 }
 
 h1 {
-  font-size: clamp(2.5rem, 6vw, 4.5rem);
-  line-height: 1.1;
+  font-size: 4rem; // Large, bold headings
 }
 
 h2 {
-  font-size: clamp(1.8rem, 4vw, 3rem);
-  line-height: 1.2;
+  font-size: 2.5rem;
 }
 
 h3 {
-  font-size: clamp(1.4rem, 3vw, 2rem);
-  line-height: 1.3;
+  font-size: 1.75rem;
 }
 
 p {
-  font-size: 1rem;
-  line-height: 1.8;
-  color: $color-text-light;
+  margin-bottom: var(--spacing-sm);
+  max-width: 75ch; // Improve readability
 }
 
-// Scrollbar Styling
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color var(--transition-duration-fast) ease-in-out;
+
+  &:hover {
+    color: var(--color-secondary);
+  }
+}
+
+// 4. LAYOUT & HELPERS
+//    Reusable layout classes.
+// -----------------------------------------------------------------------------
+
+.container {
+  width: 100%;
+  max-width: 1600px; // Max width for content
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
+}
+
+.full-width-section {
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+}
+
+// 5. SMOOTH SCROLLING & SCROLLBAR
+//    Enhance the browsing experience.
+// -----------------------------------------------------------------------------
+
+html {
+  scroll-behavior: smooth;
+}
+
+// Custom scrollbar for a more integrated look
 ::-webkit-scrollbar {
   width: 8px;
-  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: $color-light;
+  background: var(--color-background);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: $color-primary;
+  background: var(--color-border);
   border-radius: 4px;
-  
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-secondary);
+}
+
+// -----------------------------------------------------------------------------
+// #COMPONENTS
+// -----------------------------------------------------------------------------
+
+// 1. BUTTONS
+//    Minimal and clean button styles.
+// -----------------------------------------------------------------------------
+
+.btn {
+  display: inline-block;
+  font-family: var(--font-family-sans);
+  font-size: 0.9rem;
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: var(--border-width) solid transparent;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-duration-normal) var(--transition-timing-function);
+  text-align: center;
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  color: var(--color-background);
+  border-color: var(--color-primary);
+
   &:hover {
-    background: $color-accent;
+    background-color: transparent;
+    color: var(--color-primary);
   }
 }
 
-// ============================================
-// SNACKBAR STYLES - Production Level
-// ============================================
+.btn-secondary {
+  background-color: transparent;
+  color: var(--color-primary);
+  border-color: var(--color-border);
 
-.mat-mdc-snack-bar-container {
-  --mdc-snackbar-container-color: #323232;
-  --mat-mdc-snack-bar-button-color: #fff;
-  margin: 8px !important;
-}
-
-.snackbar-success {
-  --mdc-snackbar-container-color: #4ecca3 !important;
-  --mat-mdc-snack-bar-button-color: #fff !important;
-  
-  .mat-mdc-snack-bar-label,
-  .mdc-snackbar__label {
-    color: white !important;
-    font-weight: 500 !important;
-  }
-  
-  .mat-mdc-button {
-    --mdc-text-button-label-text-color: #fff !important;
-    font-weight: 700 !important;
+  &:hover {
+    background-color: var(--color-primary);
+    color: var(--color-background);
+    border-color: var(--color-primary);
   }
 }
 
-.snackbar-error {
-  --mdc-snackbar-container-color: #d45454 !important;
-  --mat-mdc-snack-bar-button-color: #fff !important;
-  
-  .mat-mdc-snack-bar-label,
-  .mdc-snackbar__label {
-    color: white !important;
-    font-weight: 500 !important;
-  }
-  
-  .mat-mdc-button {
-    --mdc-text-button-label-text-color: #fff !important;
-    font-weight: 700 !important;
-  }
-}
 
-.snackbar-info {
-  --mdc-snackbar-container-color: #2196F3 !important;
-  --mat-mdc-snack-bar-button-color: #fff !important;
-  
-  .mat-mdc-snack-bar-label,
-  .mdc-snackbar__label {
-    color: white !important;
-    font-weight: 500 !important;
-  }
-  
-  .mat-mdc-button {
-    --mdc-text-button-label-text-color: #fff !important;
-    font-weight: 700 !important;
-  }
-}
+// -----------------------------------------------------------------------------
+// #ANIMATIONS
+// -----------------------------------------------------------------------------
 
-// Animation utilities
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.fade-in-up {
-  animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-}
+// 1. FADE-IN & SLIDE-UP ON SCROLL
+//    For elegant content reveals.
+// -----------------------------------------------------------------------------
 
 .fade-in {
-  animation: fadeIn 0.4s ease-in-out;
+  opacity: 0;
+  transition: opacity var(--transition-duration-slow) ease-out;
 }
 
-// Container utilities
-.container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 40px;
-  
-  @media (max-width: 768px) {
-    padding: 0 20px;
-  }
+.fade-in.is-visible {
+  opacity: 1;
 }
 
-.container-fluid {
-  width: 100%;
-  padding: 0 40px;
-  
-  @media (max-width: 768px) {
-    padding: 0 20px;
-  }
+.slide-up {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity var(--transition-duration-normal) var(--transition-timing-function),
+              transform var(--transition-duration-slow) var(--transition-timing-function);
 }
 
-// Section spacing
-.section {
-  padding: 80px 0;
-  
-  @media (max-width: 768px) {
-    padding: 60px 0;
-  }
-}
-
-.section-title {
-  font-size: clamp(2rem, 4vw, 3rem);
-  font-weight: 800;
-  text-align: center;
-  margin-bottom: 60px;
-  letter-spacing: -0.02em;
-  
-  &::after {
-    content: '';
-    display: block;
-    width: 80px;
-    height: 3px;
-    background: $color-primary;
-    margin: 20px auto 0;
-  }
-}
-
-// Global Material Design Overrides - Fix Text Clipping
-.mat-mdc-button,
-.mat-mdc-raised-button,
-.mat-mdc-outlined-button,
-.mat-mdc-unelevated-button {
-  .mdc-button__label {
-    overflow: visible !important;
-    white-space: nowrap !important;
-    text-overflow: clip !important;
-  }
-}
-
-.mat-icon {
-  overflow: visible !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
-
-span, a, button, div, p, h1, h2, h3, h4, h5, h6 {
-  overflow: visible !important;
-}
-
-// Additional Material overrides
-.mat-mdc-menu-item {
-  white-space: nowrap !important;
-  
-  .mat-mdc-menu-item-text {
-    white-space: nowrap !important;
-  }
-}
-
-.mat-badge-content {
-  white-space: nowrap !important;
+.slide-up.is-visible {
+  opacity: 1;
+  transform: translateY(0);
 }

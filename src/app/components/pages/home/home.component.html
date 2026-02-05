@@ -1,0 +1,26 @@
+<section class="hero" @fadeIn>
+  <div class="hero__content">
+    <h1 class="hero__title" @slideInUp>ETERNAL AESTHETIC</h1>
+    <p class="hero__subtitle" @slideInUp>Timeless designs for the modern wardrobe.</p>
+    <a routerLink="/shop" class="btn btn-primary" @slideInUp>Discover The Collection</a>
+  </div>
+  <div class="hero__background">
+    <img src="https://images.unsplash.com/photo-1523381294911-8d3cead13475?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80" alt="Luxury fashion background">
+  </div>
+</section>
+
+<section class="product-grid container section">
+  <h2 class="section-title" @fadeIn>New Arrivals</h2>
+  <div class="grid" *ngIf="newArrivals$ | async as products" [@listAnimation]="products.length">
+    <div class="product-card" *ngFor="let product of products">
+      <a [routerLink]="['/product', product.id]" class="product-card__image-wrapper">
+        <img [src]="product.imageUrl" [alt]="product.name" class="product-card__image">
+        <img [src]="product.imageUrl" [alt]="product.name" class="product-card__image--hover">
+      </a>
+      <div class="product-card__info">
+        <h3 class="product-card__name">{{ product.name }}</h3>
+        <p class="product-card__price">{{ product.price | currency }}</p>
+      </div>
+    </div>
+  </div>
+</section>

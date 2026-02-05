@@ -1,0 +1,31 @@
+<header class="header" [class.scrolled]="isScrolled()">
+  <div class="container">
+    <div class="header__wrapper">
+      <div class="header__left">
+        <a routerLink="/" class="header__logo">
+          LINCEE
+        </a>
+      </div>
+
+      <nav class="header__nav" [class.open]="isMenuOpen()">
+        <ul class="header__nav-list">
+          <li class="header__nav-item"><a routerLink="/shop" class="header__nav-link">SHOP</a></li>
+          <li class="header__nav-item"><a routerLink="/collections" class="header__nav-link">COLLECTIONS</a></li>
+          <li class="header__nav-item"><a routerLink="/about" class="header__nav-link">OUR WORLD</a></li>
+        </ul>
+      </nav>
+
+      <div class="header__right">
+        <a routerLink="/account" class="header__icon">
+          <span class="material-icons">person_outline</span>
+        </a>
+        <a routerLink="/cart" class="header__icon">
+          <span class="material-icons">shopping_bag_outline</span>
+        </a>
+        <button class="header__menu-toggle" (click)="toggleMenu()">
+          <span class="material-icons">{{ isMenuOpen() ? 'close' : 'menu' }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
