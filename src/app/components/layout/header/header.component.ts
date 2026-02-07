@@ -2,6 +2,7 @@ import { Component, HostListener, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CartService } from '../../../services/cart.service';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-header',
@@ -12,6 +13,7 @@ import { CartService } from '../../../services/cart.service';
 })
 export class HeaderComponent {
   private cartService = inject(CartService);
+  public authService = inject(AuthService); // Public for template access
   
   isScrolled = signal(false);
   isMenuOpen = signal(false);
@@ -24,5 +26,10 @@ export class HeaderComponent {
 
   toggleMenu() {
     this.isMenuOpen.set(!this.isMenuOpen());
+  }
+
+  logout() {
+    this.authService.logout();
+    this.isMenuOpen.set(false);
   }
 }

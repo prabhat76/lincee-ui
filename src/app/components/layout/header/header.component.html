@@ -1,4 +1,7 @@
 <header class="header" [class.scrolled]="isScrolled()">
+  <div class="announcement-bar">
+     FREE SHIPPING ORDER OVER $100
+  </div>
   <div class="header__wrapper">
     <!-- Left spacer -->
     <div class="header__left"></div>
@@ -6,7 +9,7 @@
     <!-- Center logo -->
     <div class="header__center">
       <a routerLink="/" class="header__logo">
-        LINCEE
+        <img src="https://www.lencii.com/static/media/lenciLogo.153e28daaa59e7c410e7.png" alt="LINCEE" class="header__logo-img">
       </a>
     </div>
 
@@ -18,11 +21,23 @@
           <path d="M12 5v14M19 12l-7 7-7-7"/>
         </svg>
       </button>
-      <a routerLink="/account" class="header__icon" aria-label="Account">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-        </svg>
-      </a>
+      
+      <!-- Account / Login -->
+      <ng-container *ngIf="authService.isAuthenticated(); else loginLink">
+        <button class="header__icon logout-btn" (click)="logout()" aria-label="Logout" title="Logout">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+        </button>
+      </ng-container>
+      <ng-template #loginLink>
+        <a routerLink="/login" class="header__icon" aria-label="Login" title="Login">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
+        </a>
+      </ng-template>
+
       <a routerLink="/cart" class="header__icon" aria-label="Shopping Cart">
         <div class="icon-wrapper">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

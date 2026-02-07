@@ -17,8 +17,8 @@ import { RouterModule } from '@angular/router';
   `,
   styles: [`
     main {
-      padding-top: 60px; /* Adjust based on header height */
-      min-height: calc(100vh - 160px); /* Adjust based on header/footer height */
+      /* padding-top: 60px; REMOVED to allow banner to sit behind header */
+      min-height: calc(100vh - 160px); 
     }
   `]
 })

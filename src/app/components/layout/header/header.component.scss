@@ -8,32 +8,49 @@
 }
 
 .header {
-  padding: 10px 0; /* Reduced vertical padding for slimmer header */
+  padding: 0; 
   background-color: transparent;
+  color: #fff; /* Default text color for transparent header */
   transition: all var(--transition-duration-normal) ease;
+
+  .announcement-bar {
+    background-color: #000;
+    color: #fff;
+    text-align: center;
+    padding: 8px 0;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
 
   &.scrolled {
     background-color: var(--color-background);
-    padding: 8px 0; /* Ultra slim when scrolled */
+    color: var(--color-primary); /* Dark text for solid background */
     border-bottom: var(--border-width) solid var(--color-border);
+
+    .header__wrapper {
+      padding-top: 8px;
+      padding-bottom: 8px;
+    }
   }
 
   &__wrapper {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    padding: 0 var(--spacing-lg);
+    padding: 10px var(--spacing-lg);
 
     @media (max-width: 1024px) {
-      padding: 0 var(--spacing-md);
+      padding: 10px var(--spacing-md);
     }
 
     @media (max-width: 768px) {
-      padding: 0 var(--spacing-sm);
+      padding: 10px var(--spacing-sm);
     }
 
     @media (max-width: 480px) {
-      padding: 0 12px;
+      padding: 10px 12px;
     }
   }
 
@@ -62,29 +79,34 @@
   }
 
   &__logo {
-    font-size: 1.8rem; /* Reduced to avoid being too wide */
-    font-weight: 900;
-    letter-spacing: -0.05em; /* Tight tracking */
-    text-transform: uppercase;
-    color: var(--color-primary);
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    display: inline-flex; // Changed to flex for better image alignment
+    align-items: center;
     text-decoration: none;
-    display: inline-block;
     line-height: 1;
     
+    // Previous font styles removed or kept if fallback text is added later
+    color: currentColor;
+  }
+
+  &__logo-img {
+    height: 32px; // Default height
+    width: auto;
+    object-fit: contain;
+    transition: height var(--transition-duration-normal) ease;
+
     @media (max-width: 768px) {
-      font-size: 1.5rem;
+      height: 28px;
     }
 
     @media (max-width: 480px) {
-      font-size: 1.25rem;
+      height: 24px;
     }
   }
 
   &__shop-btn {
     background: none;
     border: none; // Remove border for cleaner look
-    color: var(--color-primary);
+    color: currentColor;
     padding: 0.5rem 0; // Remove side padding, make it text-link like
     font-size: 0.875rem;
     font-weight: 600; // Semi-bold
@@ -105,7 +127,7 @@
       left: 0;
       width: 0%;
       height: 2px;
-      background-color: var(--color-primary);
+      background-color: currentColor;
       transition: width 0.3s ease;
     }
 
@@ -138,7 +160,7 @@
   }
 
   &__icon {
-    color: var(--color-primary);
+    color: currentColor;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -193,7 +215,7 @@
     display: none;
     background: none;
     border: 1px solid transparent;
-    color: var(--color-primary);
+    color: currentColor;
     cursor: pointer;
     transition: all var(--transition-duration-fast) ease;
     width: 40px;
@@ -212,7 +234,7 @@
 
     &:hover {
       background-color: rgba(255, 255, 255, 0.1);
-      border-color: var(--color-primary);
+      border-color: currentColor;
     }
 
     @media (max-width: 768px) {
@@ -229,4 +251,18 @@
       }
     }
   }
+}
+
+.user-greeting {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-right: -4px;
+  display: none; 
+  @media(min-width: 768px) {
+      display: block;
+  }
+}
+
+.logout-btn {
+    background: transparent;
 }
