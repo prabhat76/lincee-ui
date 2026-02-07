@@ -1,0 +1,71 @@
+<div class="register-container">
+  <div class="register-card">
+    <h2>Create Account</h2>
+    <p class="subtitle">Join us to get started</p>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+      <div class="name-row">
+        <div class="form-group">
+          <label for="firstName">First Name</label>
+          <input 
+            type="text" 
+            id="firstName" 
+            formControlName="firstName" 
+            placeholder="John"
+            [class.invalid]="registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched"
+          >
+        </div>
+        <div class="form-group">
+          <label for="lastName">Last Name</label>
+          <input 
+            type="text" 
+            id="lastName" 
+            formControlName="lastName" 
+            placeholder="Doe"
+            [class.invalid]="registerForm.get('lastName')?.invalid && registerForm.get('lastName')?.touched"
+          >
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input 
+          type="email" 
+          id="email" 
+          formControlName="email" 
+          placeholder="name@example.com"
+          [class.invalid]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched"
+        >
+        <div class="error" *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
+          Valid email is required
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input 
+          type="password" 
+          id="password" 
+          formControlName="password" 
+          placeholder="••••••••"
+          [class.invalid]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched"
+        >
+        <div class="error" *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
+          Password must be at least 6 characters
+        </div>
+      </div>
+
+      <div class="api-error" *ngIf="errorMsg">
+        {{ errorMsg }}
+      </div>
+
+      <button type="submit" [disabled]="registerForm.invalid || loading">
+        {{ loading ? 'Creating Account...' : 'Create Account' }}
+      </button>
+
+      <div class="footer-links">
+        <p>Already have an account? <a routerLink="/login">Sign in</a></p>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,122 @@
+.register-container {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  
+  .register-card {
+    background: #fff;
+    padding: 2.5rem;
+    border-radius: 1px;
+    width: 100%;
+    max-width: 450px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    border: 1px solid #eee;
+
+    h2 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      text-align: center;
+      letter-spacing: -0.5px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 2rem;
+      font-size: 0.9rem;
+    }
+
+    .name-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+
+      @media (max-width: 400px) {
+        grid-template-columns: 1fr;
+        gap: 0;
+      }
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+
+      input {
+        width: 100%;
+        padding: 0.8rem;
+        border: 1px solid #ddd;
+        border-radius: 0;
+        font-size: 1rem;
+        transition: border-color 0.2s;
+        
+        &:focus {
+          outline: none;
+          border-color: #000;
+        }
+
+        &.invalid {
+          border-color: #dc3545;
+        }
+      }
+
+      .error {
+        color: #dc3545;
+        font-size: 0.8rem;
+        margin-top: 0.25rem;
+      }
+    }
+
+    .api-error {
+      background: #fde8e8;
+      color: #c81e1e;
+      padding: 0.75rem;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    button {
+      width: 100%;
+      padding: 1rem;
+      background: #000;
+      color: #fff;
+      border: none;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 1rem;
+      transition: opacity 0.2s;
+
+      &:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
+
+      &:hover:not(:disabled) {
+        opacity: 0.9;
+      }
+    }
+
+    .footer-links {
+      margin-top: 1.5rem;
+      text-align: center;
+      font-size: 0.9rem;
+
+      a {
+        color: #000;
+        font-weight: 700;
+        text-decoration: underline;
+      }
+    }
+  }
+}

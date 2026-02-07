@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HeaderComponent } from '../layout/header/header.component';
-import { FooterComponent } from '../layout/footer/footer.component';
+import { HeaderComponent } from './header/header.component';
+import { FooterComponent } from './footer/footer.component';
 import { RouterModule } from '@angular/router';
 
 @Component({
@@ -13,11 +13,11 @@ import { RouterModule } from '@angular/router';
     <main>
       <router-outlet></router-outlet>
     </main>
-    <app-footer></app-footer>
+    <app-global-footer></app-global-footer>
   `,
   styles: [`
     main {
-      padding-top: 80px; /* Adjust based on header height */
+      padding-top: 60px; /* Adjust based on header height */
       min-height: calc(100vh - 160px); /* Adjust based on header/footer height */
     }
   `]

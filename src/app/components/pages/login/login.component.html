@@ -1,0 +1,48 @@
+<div class="login-container">
+  <div class="login-card">
+    <h2>Welcome Back</h2>
+    <p class="subtitle">Enter your credentials to access your account</p>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input 
+          type="email" 
+          id="email" 
+          formControlName="email" 
+          placeholder="name@example.com"
+          [class.invalid]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
+        >
+        <div class="error" *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+          Valid email is required
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input 
+          type="password" 
+          id="password" 
+          formControlName="password" 
+          placeholder="••••••••"
+          [class.invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+        >
+        <div class="error" *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+          Password is required
+        </div>
+      </div>
+
+      <div class="api-error" *ngIf="errorMsg">
+        {{ errorMsg }}
+      </div>
+
+      <button type="submit" [disabled]="loginForm.invalid || loading">
+        {{ loading ? 'Signing in...' : 'Sign In' }}
+      </button>
+
+      <div class="footer-links">
+        <p>Don't have an account? <a routerLink="/register">Sign up</a></p>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,23 +1,17 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ProductService, Product } from '../../../services/product.service';
-import { Observable } from 'rxjs';
-import { listAnimation, fadeInAnimation, slideInUpAnimation } from '../../../core/animations';
 import { RouterModule } from '@angular/router';
+import { BannerComponent } from '../../banner/banner.component';
+import { SecondaryBannerComponent } from '../../secondary-banner/secondary-banner.component';
+import { ProductsComponent } from '../../products/products.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterModule],
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.scss'],
-  animations: [listAnimation, fadeInAnimation, slideInUpAnimation]
+  imports: [CommonModule, RouterModule, BannerComponent, SecondaryBannerComponent, ProductsComponent],
+  template: `<app-banner></app-banner>
+<app-secondary-banner></app-secondary-banner>
+<app-products></app-products>`,
+  styleUrls: ['./home.component.scss']
 })
-export class HomeComponent implements OnInit {
-  private productService = inject(ProductService);
-  newArrivals$: Observable<Product[]> | undefined;
-
-  ngOnInit() {
-    this.newArrivals$ = this.productService.getNewArrivals();
-  }
-}
+export class HomeComponent {}

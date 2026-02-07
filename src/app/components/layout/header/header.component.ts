@@ -1,6 +1,7 @@
-import { Component, HostListener, signal } from '@angular/core';
+import { Component, HostListener, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { CartService } from '../../../services/cart.service';
 
 @Component({
   selector: 'app-header',
@@ -10,8 +11,11 @@ import { RouterModule } from '@angular/router';
   styleUrls: ['./header.component.scss']
 })
 export class HeaderComponent {
+  private cartService = inject(CartService);
+  
   isScrolled = signal(false);
   isMenuOpen = signal(false);
+  cartCount = this.cartService.cartCount;
 
   @HostListener('window:scroll', [])
   onWindowScroll() {

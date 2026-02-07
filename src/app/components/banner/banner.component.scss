@@ -1,0 +1,142 @@
+$color-primary: #000;
+$color-secondary: #fff;
+$color-text: #1a1a1a;
+$color-text-light: #666;
+$color-accent: #d4af37;
+
+.banner {
+  background: $color-secondary;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  margin-top: 0;
+  padding-top: 120px;
+  text-align: center;
+
+  @media (max-width: 1024px) {
+    min-height: 90vh;
+    padding-top: 100px;
+  }
+
+  @media (max-width: 768px) {
+    min-height: 80vh;
+    padding-top: 80px;
+  }
+
+  @media (max-width: 480px) {
+    min-height: 70vh;
+    padding-top: 60px;
+  }
+}
+
+.banner-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+}
+
+.banner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 2;
+}
+
+.banner-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  max-width: 800px;
+  width: 100%;
+  padding: 0 40px;
+  position: relative;
+  z-index: 3;
+
+  @media (max-width: 1024px) {
+    gap: 30px;
+    padding: 0 30px;
+  }
+
+  @media (max-width: 768px) {
+    padding: 0 20px;
+    gap: 25px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 0 16px;
+    gap: 20px;
+  }
+}
+
+.banner-text {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  pointer-events: none; /* Let clicks pass through container */
+}
+
+/* Scroll indicator styling */
+.scroll-indicator {
+  pointer-events: auto;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
+  animation: bounce 2s infinite;
+
+  svg {
+    display: block;
+  }
+
+  &:hover {
+    background: #fff;
+    color: #000;
+    border-color: #fff;
+  }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+/* Hide old styles if present */
+ .hidden-legacy {
+    display: none;
+ }
+/* Legacy btn styles removed */
+

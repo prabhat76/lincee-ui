@@ -1,0 +1,31 @@
+<section class="products" id="products">
+  <div class="container">
+    <h2 class="section-title">LATEST DROPS</h2>
+    
+    <ng-container *ngIf="products$ | async as products; else loading">
+      <div class="products-grid">
+        <div class="product-card" *ngFor="let product of products">
+          <div class="product-image">
+            <img [src]="product.images[0]" [alt]="product.name" loading="lazy" />
+          </div>
+          <div class="product-info">
+            <h3 class="product-name">{{ product.name }}</h3>
+            <p class="product-price">{{ product.price | currency }}</p>
+            <button class="btn-add" 
+                    (click)="addToCart(product)" 
+                    [disabled]="isAdding(product.id)"
+                    [class.added]="isAdding(product.id)">
+              {{ isAdding(product.id) ? 'ADDED' : 'ADD TO CART' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-template #loading>
+      <div class="loading-container">
+        <div class="spinner"></div>
+      </div>
+    </ng-template>
+  </div>
+</section>
