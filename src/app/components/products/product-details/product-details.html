@@ -1,0 +1,62 @@
+<div class="product-details-page" *ngIf="loading()">
+    <div class="container loading">
+        Loading product...
+    </div>
+</div>
+
+<div class="product-details-page" *ngIf="!loading() && product() as p">
+    <div class="container">
+        <div class="product-grid">
+            <div class="product-gallery">
+                <img [src]="p.images[0] || 'assets/image.png'" [alt]="p.name" (error)="handleImageError($event)">
+            </div>
+            
+            <div class="product-info">
+                <h1 class="product-title">{{ p.name }}</h1>
+                <p class="product-price">{{ p.price | currency }}</p>
+                <div class="product-description">
+                    <p>{{ p.description }}</p>
+                </div>
+
+                <div class="product-options">
+                    <div class="option-group">
+                        <label>Size</label>
+                        <div class="option-buttons">
+                            <button *ngFor="let s of sizes" 
+                                    [class.active]="selectedSize() === s"
+                                    (click)="selectSize(s)">
+                                {{ s }}
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="option-group">
+                        <label>Color</label>
+                        <div class="option-buttons">
+                            <button *ngFor="let c of colors" 
+                                    [class.active]="selectedColor() === c"
+                                    (click)="selectColor(c)">
+                                {{ c }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-actions">
+                    <button class="btn-add-cart" (click)="addToCart()" [disabled]="addingToCart()">
+                        {{ addingToCart() ? 'ADDING...' : 'ADD TO CART' }}
+                    </button>
+                    <p class="message" *ngIf="message()" [class.error]="message().includes('Failed')">
+                        {{ message() }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="product-details-page" *ngIf="!loading() && !product()">
+    <div class="container error">
+        Product not found. <a routerLink="/">Go Back</a>
+    </div>
+</div>

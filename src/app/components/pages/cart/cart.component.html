@@ -1,13 +1,13 @@
 <div class="cart-page">
-  <div class="container" *ngIf="cart$ | async as cart; else loading">
+  <div class="container">
     <h1 class="page-title">SHOPPING CART</h1>
 
-    <div class="cart-empty" *ngIf="cart.items.length === 0">
+    <div class="cart-empty" *ngIf="cart().items.length === 0">
       <p>Your cart is currently empty.</p>
-      <a routerLink="/" class="btn-continue">CONTINUE SHOPPING</a>
+      <a routerLink="/" class="btn btn-primary">CONTINUE SHOPPING</a>
     </div>
 
-    <div class="cart-content" *ngIf="cart.items.length > 0">
+    <div class="cart-content" *ngIf="cart().items.length > 0">
       <div class="cart-items">
         <div class="cart-header">
           <span>PRODUCT</span>
@@ -15,22 +15,25 @@
           <span>TOTAL</span>
         </div>
 
-        <div class="cart-item" *ngFor="let item of cart.items">
+        <div class="cart-item" *ngFor="let item of cart().items">
           <div class="item-info">
-            <!-- Fallback image since API cart item might not have it, or use product if available -->
             <div class="item-image">
-               <img src="assets/image.png" alt="Product Image"> 
+               <!-- Product Image with fallback -->
+               <img [src]="item.image || 'assets/image.png'" [alt]="item.productName" (error)="handleImageError($event)"> 
             </div>
             <div class="item-details">
-              <h3>{{ item.productName || 'Product ' + item.productId }}</h3>
+              <h3>{{ item.productName }}</h3>
               <p class="price">{{ item.price | currency }}</p>
-              <p class="variant" *ngIf="item.size">{{ item.size }} / {{ item.color }}</p>
-              <button class="btn-remove" (click)="removeItem(item.productId)">REMOVE</button>
+              <button class="btn-text" (click)="removeItem(item.productId)">REMOVE</button>
             </div>
           </div>
           
           <div class="item-quantity">
-            <span>{{ item.quantity }}</span>
+            <div class="quantity-controls">
+                <button class="btn-qty" (click)="updateQuantity(item.productId, -1)">−</button>
+                <span class="qty-display">{{ item.quantity }}</span>
+                <button class="btn-qty" (click)="updateQuantity(item.productId, 1)">+</button>
+            </div>
           </div>
 
           <div class="item-total">
@@ -42,17 +45,11 @@
       <div class="cart-summary">
         <div class="summary-row">
           <span>SUBTOTAL</span>
-          <span>{{ cart.total | currency }}</span>
+          <span>{{ cart().total | currency }}</span>
         </div>
         <div class="summary-note">Taxes and shipping calculated at checkout</div>
-        <button class="btn-checkout">CHECKOUT</button>
+        <button class="btn btn-primary" routerLink="/checkout">CHECKOUT</button>
       </div>
     </div>
   </div>
-  
-  <ng-template #loading>
-    <div class="loading-container">
-      <div class="spinner"></div>
-    </div>
-  </ng-template>
 </div>

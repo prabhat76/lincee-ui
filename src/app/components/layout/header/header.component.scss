@@ -14,8 +14,8 @@
   transition: all var(--transition-duration-normal) ease;
 
   .announcement-bar {
-    background-color: #000;
-    color: #fff;
+    background-color: var(--color-primary);
+    color: var(--color-background);
     text-align: center;
     padding: 8px 0;
     font-size: 0.75rem;
@@ -263,6 +263,4 @@
   }
 }
 
-.logout-btn {
-    background: transparent;
-}
+

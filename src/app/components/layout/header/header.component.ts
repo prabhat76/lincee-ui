@@ -19,6 +19,10 @@ export class HeaderComponent {
   isMenuOpen = signal(false);
   cartCount = this.cartService.cartCount;
 
+  isAdmin() {
+    return this.authService.currentUserRole === 'ADMIN';
+  }
+
   @HostListener('window:scroll', [])
   onWindowScroll() {
     this.isScrolled.set(window.scrollY > 10);

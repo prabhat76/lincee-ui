@@ -23,15 +23,7 @@
     color: var(--color-secondary);
   }
 
-  .btn-continue {
-    background: var(--color-primary);
-    color: var(--color-background);
-    padding: 16px 32px;
-    text-decoration: none;
-    font-weight: 700;
-    font-size: 0.9rem;
-    display: inline-block;
-  }
+  
 }
 
 .cart-content {
@@ -107,25 +99,49 @@
       color: var(--color-secondary);
     }
 
-    .btn-remove {
-      background: none;
-      border: none;
-      padding: 0;
-      color: var(--color-secondary);
-      font-size: 0.75rem;
-      text-decoration: underline;
-      cursor: pointer;
-      width: fit-content;
-      margin-top: 0.5rem;
-
-      &:hover {
-        color: var(--color-primary);
-      }
-    }
+    
   }
 
   .item-quantity {
-    color: var(--color-text);
+    display: flex;
+    align-items: center;
+
+    .quantity-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border: var(--border-width) solid var(--color-border);
+      border-radius: var(--border-radius-sm);
+      height: 40px;
+      width: 120px;
+
+      .btn-qty {
+        background: transparent;
+        border: none;
+        color: var(--color-text);
+        height: 100%;
+        font-size: 1.2rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s;
+        flex: 1;
+
+        &:hover {
+          background: var(--color-surface); 
+        }
+      }
+
+      .qty-display {
+        font-weight: var(--font-weight-bold);
+        font-size: 1rem;
+        color: var(--color-text);
+        padding: 0 var(--spacing-sm);
+        flex: 1;
+        text-align: center;
+      }
+    }
   }
 
   .item-total {
@@ -153,22 +169,7 @@
     margin-bottom: 2rem;
   }
 
-  .btn-checkout {
-    width: 100%;
-    background: var(--color-primary);
-    color: var(--color-background);
-    border: none;
-    padding: 16px;
-    font-weight: 700;
-    font-size: 0.9rem;
-    cursor: pointer;
-    text-transform: uppercase;
-    transition: opacity 0.3s ease;
-
-    &:hover {
-      opacity: 0.9;
-    }
-  }
+  
 }
 
 .loading-container {
@@ -178,15 +179,4 @@
   align-items: center;
 }
 
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid rgba(255,255,255,0.1);
-  border-radius: 50%;
-  border-top-color: #fff;
-  animation: spin 1s ease-in-out infinite;
-}
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}

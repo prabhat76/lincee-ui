@@ -36,7 +36,7 @@
         {{ errorMsg }}
       </div>
 
-      <button type="submit" [disabled]="loginForm.invalid || loading">
+      <button type="submit" class="btn btn-primary" [disabled]="loginForm.invalid || loading">
         {{ loading ? 'Signing in...' : 'Sign In' }}
       </button>
 

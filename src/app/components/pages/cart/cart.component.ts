@@ -2,7 +2,6 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CartService, Cart } from '../../../services/cart.service';
-import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-cart',
@@ -12,11 +11,20 @@ import { Observable } from 'rxjs';
   styleUrls: ['./cart.component.scss']
 })
 export class CartComponent {
-  private cartService = inject(CartService);
+  public cartService = inject(CartService);
   
-  cart$: Observable<Cart> = this.cartService.getCart();
+  // Use the signal directly in the template
+  cart = this.cartService.cart;
 
   removeItem(productId: number) {
     this.cartService.removeFromCart(productId).subscribe();
+  }
+
+  updateQuantity(productId: number, change: number) {
+    this.cartService.updateQuantity(productId, change);
+  }
+
+  handleImageError(event: any) {
+    event.target.src = 'assets/image.png';
   }
 }

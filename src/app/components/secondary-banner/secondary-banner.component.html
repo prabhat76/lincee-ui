@@ -1,8 +1,20 @@
-<section class="secondary-banner" id="secondary-banner">
-  <img src="assets/image copy 2.png" alt="Secondary Banner" class="banner-image">
-  <div class="banner-content">
+<section class="secondary-banner" id="secondary-banner" @fadeIn>
+  <img src="assets/image copy 2.png" alt="A model wearing a hoodie" class="banner-image" loading="lazy">
+  <div class="banner-content" @slideInUp>
+    <span class="eyebrow">Seasonal Edit</span>
     <h2>Explore Our Collections</h2>
-    <p>From premium hoodies to essential tees, find your perfect fit.</p>
-    <button (click)="scrollToProducts()">Shop Hoodies</button>
+    <div class="scrolling-text" aria-live="polite">
+      <div class="scrolling-track">
+        <span class="scrolling-item">From premium hoodies to essential tees.</span>
+        <span class="scrolling-item">Find your perfect fit for every day.</span>
+        <span class="scrolling-item">Limited drops, crafted for comfort.</span>
+        <span class="scrolling-item">From premium hoodies to essential tees.</span>
+        <span class="scrolling-item">Find your perfect fit for every day.</span>
+        <span class="scrolling-item">Limited drops, crafted for comfort.</span>
+      </div>
+    </div>
+    <div class="banner-actions">
+      <button class="btn btn-secondary" (click)="scrollToProducts()">Shop Hoodies</button>
+    </div>
   </div>
 </section>

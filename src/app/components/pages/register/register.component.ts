@@ -30,17 +30,24 @@ export class RegisterComponent {
     if (this.registerForm.valid) {
       this.loading = true;
       this.errorMsg = '';
-      this.authService.register(this.registerForm.value as any).subscribe({
+      
+      // Common Fix: Backend often requires 'username', so we map email to it.
+      const payload = {
+        ...this.registerForm.value,
+        username: this.registerForm.value.email,
+        role: 'USER'
+      };
+
+      this.authService.register(payload).subscribe({
         next: () => {
           this.loading = false;
-          // Redirect to login after successful registration or auto-login
-          // For now, let's redirect to login with a message (or just login logic)
-          this.router.navigate(['/login']);
+          this.router.navigate(['/login'], { queryParams: { registered: 'true' } });
         },
         error: (err) => {
           this.loading = false;
-          this.errorMsg = 'Registration failed. Please try again.';
-          console.error(err);
+          // Display a friendly error, but log the full details
+          this.errorMsg = err?.error?.message || 'Registration failed. Try a different email address.';
+          console.error('Registration Error:', err);
         }
       });
     }

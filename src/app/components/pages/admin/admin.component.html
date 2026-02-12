@@ -1,0 +1,113 @@
+<div class="admin-page">
+  <div class="container">
+    <div class="admin-header">
+      <h1>Admin Console</h1>
+      <p>Manage products and update orders.</p>
+    </div>
+
+    <div class="error" *ngIf="error()">{{ error() }}</div>
+
+    <section class="admin-section">
+      <div class="section-header">
+        <h2>Shop Items</h2>
+      </div>
+
+      <div class="table" *ngIf="!loadingShopItems()">
+        <div class="table-header">
+          <span>ID</span>
+          <span>Name</span>
+          <span>Price</span>
+          <span>Category</span>
+          <span>Stock Status</span>
+        </div>
+        <div class="table-row" *ngFor="let item of shopItems()">
+          <span>#{{ item.id }}</span>
+          <span>{{ item.name }}</span>
+          <span>{{ item.price | currency }}</span>
+          <span>{{ item.category }}</span>
+          <span class="stock-status">In Stock</span>
+        </div>
+        <div class="empty" *ngIf="shopItems().length === 0">No items in shop</div>
+      </div>
+      <div class="loading" *ngIf="loadingShopItems()">Loading shop items...</div>
+    </section>
+
+    <section class="admin-section">
+      <div class="section-header">
+        <h2>Products</h2>
+      </div>
+
+      <form [formGroup]="productForm" (ngSubmit)="submitProduct()" class="product-form">
+        <div class="form-row">
+          <input formControlName="name" placeholder="Product name" />
+          <input formControlName="price" type="number" placeholder="Price" />
+        </div>
+        <div class="form-row">
+          <input formControlName="category" placeholder="Category" />
+          <input formControlName="imageUrl" placeholder="Image URL" />
+        </div>
+        <textarea formControlName="description" rows="3" placeholder="Description"></textarea>
+        <div class="form-actions">
+          <button class="btn btn-primary" type="submit">Save Product</button>
+          <button class="btn btn-secondary" type="button" (click)="productForm.reset({ id: null, name: '', price: 0, description: '', category: '', imageUrl: '' })">
+            Clear
+          </button>
+        </div>
+      </form>
+
+      <div class="table" *ngIf="!loadingProducts()">
+        <div class="table-header">
+          <span>Name</span>
+          <span>Price</span>
+          <span>Category</span>
+          <span>Actions</span>
+        </div>
+        <div class="table-row" *ngFor="let product of products()">
+          <span>{{ product.name }}</span>
+          <span>{{ product.price | currency }}</span>
+          <span>{{ product.category }}</span>
+          <div class="row-actions">
+            <button class="btn-text" (click)="editProduct(product)">Edit</button>
+            <button class="btn-text danger" (click)="deleteProduct(product.id)">Delete</button>
+          </div>
+        </div>
+      </div>
+      <div class="loading" *ngIf="loadingProducts()">Loading products...</div>
+    </section>
+
+    <section class="admin-section">
+      <div class="section-header">
+        <h2>Orders</h2>
+        <div class="filter">
+          <label for="status">Status</label>
+          <select id="status" [value]="statusFilter()" (change)="onStatusFilterChange($any($event.target).value)">
+            <option *ngFor="let status of statusOptions" [value]="status">{{ status }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="table" *ngIf="!loadingOrders()">
+        <div class="table-header">
+          <span>Order</span>
+          <span>Items</span>
+          <span>Status</span>
+          <span>Update</span>
+        </div>
+        <div class="table-row" *ngFor="let order of orders()">
+          <span>#{{ order.id }}</span>
+          <span>{{ getOrderItems(order).length }} item(s)</span>
+          <span class="status">{{ order.status }}</span>
+          <div class="row-actions">
+            <select #nextStatus>
+              <option value="" disabled selected>-- Select status --</option>
+              <option *ngFor="let status of getValidNextStatuses(order)" [value]="status">{{ status }}</option>
+            </select>
+            <input #trackingNumber class="tracking-input" placeholder="Tracking # (optional)" />
+            <button class="btn-text" (click)="updateOrderStatus(order, nextStatus.value, trackingNumber.value)">Update</button>
+          </div>
+        </div>
+      </div>
+      <div class="loading" *ngIf="loadingOrders()">Loading orders...</div>
+    </section>
+  </div>
+</div>

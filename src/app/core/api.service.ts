@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -7,17 +7,46 @@ import { Observable } from 'rxjs';
 })
 export class ApiService {
   private http = inject(HttpClient);
-  private baseUrl = 'https://linceecom-production.up.railway.app/api/v1'; // Using the previous API URL
+  private baseUrl = 'https://linceecom-production.up.railway.app/api/v1';
 
-  get<T>(endpoint: string): Observable<T> {
-    return this.http.get<T>(`${this.baseUrl}/${endpoint}`);
+  private getHeaders(skipAuth: boolean = false): HttpHeaders {
+    let headers = new HttpHeaders();
+    if (!skipAuth) {
+      const token = localStorage.getItem('token');
+      if (token) {
+        headers = headers.set('Authorization', `Bearer ${token}`);
+      }
+    }
+    return headers;
   }
 
-  post<T>(endpoint: string, body: any): Observable<T> {
-    return this.http.post<T>(`${this.baseUrl}/${endpoint}`, body);
+  get<T>(endpoint: string, options?: { skipAuth?: boolean }): Observable<T> {
+    return this.http.get<T>(`${this.baseUrl}/${endpoint}`, { 
+      headers: this.getHeaders(options?.skipAuth) 
+    });
   }
 
-  delete<T>(endpoint: string): Observable<T> {
-    return this.http.delete<T>(`${this.baseUrl}/${endpoint}`);
+  post<T>(endpoint: string, body: any, options?: { skipAuth?: boolean }): Observable<T> {
+    return this.http.post<T>(`${this.baseUrl}/${endpoint}`, body, { 
+      headers: this.getHeaders(options?.skipAuth) 
+    });
+  }
+
+  delete<T>(endpoint: string, options?: { skipAuth?: boolean }): Observable<T> {
+    return this.http.delete<T>(`${this.baseUrl}/${endpoint}`, { 
+      headers: this.getHeaders(options?.skipAuth) 
+    });
+  }
+
+  put<T>(endpoint: string, body: any, options?: { skipAuth?: boolean }): Observable<T> {
+    return this.http.put<T>(`${this.baseUrl}/${endpoint}`, body, { 
+      headers: this.getHeaders(options?.skipAuth) 
+    });
+  }
+
+  patch<T>(endpoint: string, body: any, options?: { skipAuth?: boolean }): Observable<T> {
+    return this.http.patch<T>(`${this.baseUrl}/${endpoint}`, body, {
+      headers: this.getHeaders(options?.skipAuth)
+    });
   }
 }

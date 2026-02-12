@@ -1,31 +1,60 @@
 <section class="products" id="products">
   <div class="container">
-    <h2 class="section-title">LATEST DROPS</h2>
+    <div class="header-row">
+      <h2 class="section-title">LATEST DROPS</h2>
+      <div class="search-box">
+        <input type="text" 
+               [ngModel]="searchQuery()" 
+               (ngModelChange)="onSearch($event)"
+               placeholder="Search products..." />
+      </div>
+    </div>
     
-    <ng-container *ngIf="products$ | async as products; else loading">
+    <div *ngIf="loading()" class="loading-container">
+      <div class="spinner"></div>
+    </div>
+
+    <div *ngFor="let group of filteredGroups()" class="category-section">
+      <h3 class="category-title">{{ group.name }}</h3>
+      
       <div class="products-grid">
-        <div class="product-card" *ngFor="let product of products">
-          <div class="product-image">
-            <img [src]="product.images[0]" [alt]="product.name" loading="lazy" />
+        <div class="product-card" *ngFor="let product of group.products | slice:0:group.visibleCount">
+          <div class="product-image" [routerLink]="['/products', product.id]" style="cursor: pointer;">
+            <img [src]="product.images[0]" [alt]="product.name" loading="lazy" (error)="handleImageError($event)" />
           </div>
           <div class="product-info">
-            <h3 class="product-name">{{ product.name }}</h3>
+            <h3 class="product-name" [routerLink]="['/products', product.id]" style="cursor: pointer;">{{ product.name }}</h3>
             <p class="product-price">{{ product.price | currency }}</p>
-            <button class="btn-add" 
-                    (click)="addToCart(product)" 
-                    [disabled]="isAdding(product.id)"
-                    [class.added]="isAdding(product.id)">
-              {{ isAdding(product.id) ? 'ADDED' : 'ADD TO CART' }}
-            </button>
+            
+            <div class="cart-actions" (click)="$event.stopPropagation()">
+              <div class="quantity-controls" *ngIf="getQuantity(product.id) > 0; else addButton">
+                <button class="btn-qty" (click)="decreaseQuantity(product, $event)" [disabled]="isAdding(product.id)">−</button>
+                <span class="qty-display">{{ getQuantity(product.id) }}</span>
+                <button class="btn-qty" (click)="increaseQuantity(product, $event)" [disabled]="isAdding(product.id)">+</button>
+              </div>
+
+              <ng-template #addButton>
+                <button class="btn btn-secondary" 
+                        (click)="addToCart(product, $event)" 
+                        [disabled]="isAdding(product.id)">
+                  <span *ngIf="!isAdding(product.id)">ADD TO CART</span>
+                  <div *ngIf="isAdding(product.id)" class="btn-spinner"></div>
+                </button>
+              </ng-template>
+            </div>
           </div>
         </div>
       </div>
-    </ng-container>
 
-    <ng-template #loading>
-      <div class="loading-container">
-        <div class="spinner"></div>
+      <div class="see-more-container" *ngIf="group.products.length > group.visibleCount">
+        <button class="btn btn-secondary" (click)="showMore(group)">
+           See More {{ group.name }} ({{ group.products.length - group.visibleCount }} more)
+        </button>
       </div>
-    </ng-template>
+    </div>
+
+    <div *ngIf="!loading() && filteredGroups().length === 0" class="no-results">
+        No products found matching "{{ searchQuery() }}"
+    </div>
   </div>
 </section>

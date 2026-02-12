@@ -8,14 +8,13 @@ DESIGN SYSTEM & GLOBAL STYLES
 // -----------------------------------------------------------------------------
 
 // 1. CSS VARIABLES
-//    Using CSS variables for a flexible and consistent dark theme.
-//    Inspired by premium, minimalist aesthetics.
+//    Using CSS variables for a flexible and consistent theme (Light/Dark).
 // -----------------------------------------------------------------------------
 
 :root {
   // -- FONT FAMILY
   --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
-  --font-family-serif: 'Libre Baskerville', serif; // Example serif for editorial content
+  --font-family-serif: 'Libre Baskerville', serif;
 
   // -- TYPOGRAPHY
   --font-weight-light: 300;
@@ -27,15 +26,18 @@ DESIGN SYSTEM & GLOBAL STYLES
   --letter-spacing-normal: 0.01em;
   --letter-spacing-wide: 0.05em;
 
-  // -- COLOR PALETTE (Dark, Cinematic, Muted)
-  --color-background: #0a0a0a; // Deep, near-black for a cinematic feel
-  --color-surface: #121212;    // Charcoal for cards and surfaces
-  --color-primary: #ffffff;    // Off-white for primary actions and highlights
-  --color-secondary: #a0a0a0;  // Muted gray for secondary text and borders
-  --color-text: #e0e0e0;       // Soft white for body text
-  --color-text-heading: #ffffff; // Pure white for strong headings
-  --color-border: #2a2a2a;     // Subtle border color
-  --color-accent: #b8a07e;     // Muted gold/brass for a touch of luxury (use sparingly)
+  // -- COLOR PALETTE (Light Mode Default)
+  --color-background: #ffffff;
+  --color-surface: #f5f5f5;
+  --color-primary: #111111;    // Almost black for primary actions
+  --color-secondary: #666666;
+  --color-text: #1a1a1a;
+  --color-text-heading: #000000;
+  --color-border: #e0e0e0;
+  --color-accent: #b8a07e;
+  --color-error: #dc3545;
+  --color-error-background: #fde8e8;
+  --color-error-text: #c81e1e;
 
   // -- SPACING & LAYOUT
   --spacing-unit: 8px;
@@ -56,6 +58,8 @@ DESIGN SYSTEM & GLOBAL STYLES
   --transition-duration-fast: 0.2s;
   --transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
+
+
 
 
 // 2. GLOBAL RESETS & DEFAULTS
@@ -147,6 +151,20 @@ a {
   margin-right: -50vw;
 }
 
+.section-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--color-text-heading);
+  text-align: center;
+  margin-bottom: var(--spacing-lg);
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+  }
+}
+
 // 5. SMOOTH SCROLLING & SCROLLBAR
 //    Enhance the browsing experience.
 // -----------------------------------------------------------------------------
@@ -218,6 +236,22 @@ html {
     border-color: var(--color-primary);
   }
 }
+
+.btn-text {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--color-secondary);
+  font-size: 0.75rem;
+  text-decoration: underline;
+  cursor: pointer;
+  width: fit-content;
+
+  &:hover {
+    color: var(--color-primary);
+  }
+}
+
 
 
 // -----------------------------------------------------------------------------
