@@ -1,73 +1,78 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { ProductService, Product, ProductImage } from '../../../services/product.service';
+import { ProductService, Product } from '../../../services/product.service';
 import { OrderService, Order } from '../../../services/order.service';
 import { AuthService } from '../../../services/auth.service';
 import { NotificationService } from '../../../services/notification.service';
-import { ProductImageUploadComponent } from '../../product-image-upload/product-image-upload.component';import { ExcelImportComponent } from '../../excel-import/excel-import.component';
+import { ProductFormComponent } from '../../product-form/product-form.component';
+import { ProductListComponent } from '../../product-list/product-list.component';
+import { OrdersSectionComponent } from '../../orders-section/orders-section.component';
+import { ExcelImportComponent } from '../../excel-import/excel-import.component';
 import { ExcelImportResponse } from '../../../services/excel-import.service';
+
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, ProductImageUploadComponent, ExcelImportComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    ProductFormComponent,
+    ProductListComponent,
+    OrdersSectionComponent,
+    ExcelImportComponent
+  ],
   templateUrl: './admin.component.html',
   styleUrls: ['./admin.component.scss']
 })
 export class AdminComponent implements OnInit {
-  private fb = inject(FormBuilder);
   private productService = inject(ProductService);
   private orderService = inject(OrderService);
   private authService = inject(AuthService);
   private notificationService = inject(NotificationService);
   private router = inject(Router);
 
+  // Products
   products = signal<Product[]>([]);
-  orders = signal<Order[]>([]);
-  shopItems = signal<Product[]>([]);
   loadingProducts = signal(false);
+  editingProduct = signal<Product | null>(null);
+
+  // Orders
+  orders = signal<Order[]>([]);
   loadingOrders = signal(false);
+  currentStatusFilter = signal('PENDING');
+
+  // Shop Items
+  shopItems = signal<Product[]>([]);
   loadingShopItems = signal(false);
+
+  // UI State
   error = signal<string | null>(null);
-  showAllProducts = signal(false);
-  selectedProductImages = signal<ProductImage[]>([]);
-  showImageUpload = signal(false);
   showExcelImport = signal(false);
 
-  statusFilter = signal('PENDING');
-  statusOptions = ['PENDING', 'CONFIRMED', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
-
-  // Valid status transitions
-  private validTransitions: { [key: string]: string[] } = {
-    'PENDING': ['CONFIRMED', 'CANCELLED'],
-    'CONFIRMED': ['SHIPPED', 'CANCELLED'],
-    'SHIPPED': ['DELIVERED', 'CANCELLED'],
-    'DELIVERED': ['CANCELLED'],
-    'CANCELLED': []
-  };
-
-  productForm = this.fb.group({
-    id: [null as number | null],
-    name: ['', Validators.required],
-    price: [0, [Validators.required, Validators.min(0)]],
-    description: ['', Validators.required],
-    category: [''],
-    imageUrl: ['']
-  });
-
   ngOnInit() {
+    // Check admin authorization
     if (this.authService.currentUserRole !== 'ADMIN') {
       this.router.navigate(['/account']);
       return;
     }
 
-    this.loadProducts();
-    this.loadOrders();
-    this.loadShopItems();
+    this.loadAllData();
   }
 
-  loadShopItems() {
+  /**
+   * Load all data (products, orders, shop items)
+   */
+  private loadAllData(): void {
+    this.loadShopItems();
+    this.loadProducts();
+    this.loadOrders();
+  }
+
+  /**
+   * Load shop items for display
+   */
+  loadShopItems(): void {
     this.loadingShopItems.set(true);
     this.productService.getProducts().subscribe({
       next: (products) => {
@@ -75,14 +80,17 @@ export class AdminComponent implements OnInit {
         this.loadingShopItems.set(false);
       },
       error: (err) => {
-        console.error(err);
+        console.error('Failed to load shop items:', err);
         this.error.set('Failed to load shop items.');
         this.loadingShopItems.set(false);
       }
     });
   }
 
-  loadProducts() {
+  /**
+   * Load all products
+   */
+  loadProducts(): void {
     this.loadingProducts.set(true);
     this.productService.getProducts().subscribe({
       next: (products) => {
@@ -90,111 +98,78 @@ export class AdminComponent implements OnInit {
         this.loadingProducts.set(false);
       },
       error: (err) => {
-        console.error(err);
+        console.error('Failed to load products:', err);
         this.error.set('Failed to load products.');
         this.loadingProducts.set(false);
       }
     });
   }
 
-  loadOrders() {
+  /**
+   * Load orders by status filter
+   */
+  loadOrders(): void {
     this.loadingOrders.set(true);
-    this.orderService.getOrdersByStatus(this.statusFilter()).subscribe({
+    this.orderService.getOrdersByStatus(this.currentStatusFilter()).subscribe({
       next: (orders) => {
         this.orders.set(orders);
         this.loadingOrders.set(false);
       },
       error: (err) => {
-        console.error(err);
+        console.error('Failed to load orders:', err);
         this.error.set('Failed to load orders.');
         this.loadingOrders.set(false);
       }
     });
   }
 
-  onStatusFilterChange(value: string) {
-    this.statusFilter.set(value);
+  /**
+   * Handle status filter change for orders
+   */
+  onStatusFilterChange(status: string): void {
+    this.currentStatusFilter.set(status);
     this.loadOrders();
   }
 
-  submitProduct() {
-    if (this.productForm.invalid) return;
-
-    const { id, name, price, description, category, imageUrl } = this.productForm.value;
-    
-    // Build image URLs from uploaded images
-    const imageUrls: string[] = [];
-    const uploadedImages = this.selectedProductImages();
-    
-    if (uploadedImages.length > 0) {
-      imageUrls.push(...uploadedImages.map(img => img.url));
-    } else if (imageUrl) {
-      imageUrls.push(imageUrl);
-    }
-
-    const payload = {
-      name: name || '',
-      price: Number(price || 0),
-      description: description || '',
-      category: category || 'Other',
-      imageUrls: imageUrls.length > 0 ? imageUrls : [],
-      productImages: uploadedImages.length > 0 ? uploadedImages : undefined
-    };
-
-    if (id) {
-      this.productService.updateProduct(id, payload).subscribe({
-        next: () => {
-          this.notificationService.success(`Product "${name}" updated successfully!`);
-          this.resetProductForm();
-          this.loadProducts();
-        },
-        error: (err) => {
-          console.error(err);
-          this.notificationService.error('Failed to update product.');
-        }
-      });
-    } else {
-      this.productService.createProduct(payload).subscribe({
-        next: () => {
-          this.notificationService.success(`Product "${name}" created successfully!`);
-          this.resetProductForm();
-          this.loadProducts();
-        },
-        error: (err) => {
-          console.error(err);
-          this.notificationService.error('Failed to create product.');
-        }
-      });
-    }
+  /**
+   * Handle product form submission (create or update)
+   */
+  onProductSubmitted(event: { isUpdate: boolean; product: Product }): void {
+    // Clear editing state
+    this.editingProduct.set(null);
+    // Reload products to show changes
+    this.loadProducts();
   }
 
-  private resetProductForm() {
-    this.productForm.reset({ id: null, name: '', price: 0, description: '', category: '', imageUrl: '' });
-    this.selectedProductImages.set([]);
-    this.showImageUpload.set(false);
+  /**
+   * Handle edit product
+   */
+  onEditProduct(product: Product): void {
+    this.editingProduct.set(product);
+    // Scroll to form
+    setTimeout(() => {
+      document.querySelector('.product-form')?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
   }
 
-  onReset(): void {
-    this.resetProductForm();
+  /**
+   * Handle form reset
+   */
+  onFormReset(): void {
+    this.editingProduct.set(null);
   }
 
-  editProduct(product: Product) {
-    this.productForm.patchValue({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      description: product.description,
-      category: product.category || '',
-      imageUrl: product.images?.[0] || ''
-    });
-    this.selectedProductImages.set(product.productImages || []);
-    this.showImageUpload.set(true);
+  /**
+   * Handle product deletion
+   */
+  onProductDeleted(productId: number): void {
+    // Reload products to reflect deletion
+    this.loadProducts();
   }
 
-  onImagesSelected(images: ProductImage[]): void {
-    this.selectedProductImages.set(images);
-  }
-
+  /**
+   * Handle Excel import completion
+   */
   onProductImported(result: ExcelImportResponse): void {
     if (result.success) {
       // Reload products to show newly imported ones
@@ -202,72 +177,10 @@ export class AdminComponent implements OnInit {
     }
   }
 
-  deleteProduct(productId: number) {
-    if (!confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
-      return;
-    }
-
-    this.productService.deleteProduct(productId).subscribe({
-      next: () => {
-        console.log(`Product ${productId} deleted successfully`);
-        this.notificationService.success('Product deleted successfully!');
-        this.loadProducts();
-      },
-      error: (err) => {
-        console.error('Delete error:', err);
-        console.error('Status:', err?.status);
-        console.error('Message:', err?.message);
-        console.error('Error response:', err?.error);
-        this.notificationService.error(`Failed to delete product. Error: ${err?.error?.message || err?.message || 'Unknown error'}`);
-      }
-    });
-  }
-
-  toggleShowAllProducts() {
-    this.showAllProducts.set(!this.showAllProducts());
-  }
-
-  getDisplayedProducts(): Product[] {
-    const allProducts = this.products();
-    return this.showAllProducts() ? allProducts : allProducts.slice(0, 5);
-  }
-
-  updateOrderStatus(order: Order, status: string, trackingNumber?: string) {
-    if (!order.id) return;
-
-    const currentStatus = order.status || 'PENDING';
-    const normalizedStatus = status.toUpperCase();
-
-    // Check if transition is valid
-    const allowedNextStatuses = this.validTransitions[currentStatus.toUpperCase()] || [];
-    if (!allowedNextStatuses.includes(normalizedStatus)) {
-      this.notificationService.error(`Cannot transition from ${currentStatus} to ${normalizedStatus}. Valid options: ${allowedNextStatuses.join(', ')}`);
-      return;
-    }
-
-    if (['SHIPPED', 'DELIVERED'].includes(normalizedStatus) && !trackingNumber) {
-      this.notificationService.warning('Tracking number is required for shipped/delivered orders.');
-      return;
-    }
-
-    this.orderService.updateOrderStatus(order.id, normalizedStatus, trackingNumber).subscribe({
-      next: () => {
-        this.notificationService.success(`Order #${order.id} status updated to ${normalizedStatus}!`);
-        this.loadOrders();
-      },
-      error: (err) => {
-        console.error(err);
-        this.notificationService.error('Failed to update order status.');
-      }
-    });
-  }
-
-  getValidNextStatuses(order: Order): string[] {
-    const currentStatus = order.status || 'PENDING';
-    return this.validTransitions[currentStatus.toUpperCase()] || [];
-  }
-
-  getOrderItems(order: Order): any[] {
-    return (order as any).orderItems || (order as any).items || [];
+  /**
+   * Toggle Excel import section
+   */
+  toggleExcelImport(): void {
+    this.showExcelImport.set(!this.showExcelImport());
   }
 }
