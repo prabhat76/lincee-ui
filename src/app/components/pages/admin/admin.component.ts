@@ -203,14 +203,22 @@ export class AdminComponent implements OnInit {
   }
 
   deleteProduct(productId: number) {
+    if (!confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
+      return;
+    }
+
     this.productService.deleteProduct(productId).subscribe({
       next: () => {
+        console.log(`Product ${productId} deleted successfully`);
         this.notificationService.success('Product deleted successfully!');
         this.loadProducts();
       },
       error: (err) => {
-        console.error(err);
-        this.notificationService.error('Failed to delete product.');
+        console.error('Delete error:', err);
+        console.error('Status:', err?.status);
+        console.error('Message:', err?.message);
+        console.error('Error response:', err?.error);
+        this.notificationService.error(`Failed to delete product. Error: ${err?.error?.message || err?.message || 'Unknown error'}`);
       }
     });
   }
