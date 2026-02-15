@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -7,6 +7,8 @@ import { OrderService } from '../../../services/order.service';
 import { AuthService } from '../../../services/auth.service';
 import { PaymentService, PaymentGateway } from '../../../services/payment.service';
 import { NotificationService } from '../../../services/notification.service';
+import { AddressService } from '../../../services/address.service';
+import { of, switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-checkout',
@@ -32,6 +34,9 @@ import { NotificationService } from '../../../services/notification.service';
               </div>
 
                <h2>Payment Method</h2>
+               <p style="color: var(--color-text-light); font-size: 0.9rem; margin-bottom: 10px;">
+                 Select your preferred payment method ({{ paymentMethods().length }} options: Stripe, PhonePay, Google Pay, PayPal, Cash on Delivery)
+               </p>
                <div class="payment-gateways">
                  <div class="payment-gateway-grid">
                    <button *ngFor="let method of paymentMethods()"
@@ -52,6 +57,9 @@ import { NotificationService } from '../../../services/notification.service';
                      </svg>
                      <svg *ngIf="method.gateway === 'paypal'" viewBox="0 0 24 24" fill="currentColor">
                        <path d="M9.5 3h5l-1 7H8l1-7m-8 0h5l-1 7H0l1-7m8.5 10h5l-1 4H8l1-4"/>
+                     </svg>
+                     <svg *ngIf="method.gateway === 'cod'" viewBox="0 0 24 24" fill="currentColor">
+                       <path d="M21 18v1c0 1.1-.9 2-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h14c1.1 0 2 .9 2 2v1h-9a2 2 0 00-2 2v8a2 2 0 002 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
                      </svg>
                      <span>{{ method.name }}</span>
                    </button>
@@ -146,8 +154,23 @@ import { NotificationService } from '../../../services/notification.service';
     .payment-gateways { margin: 20px 0; }
     .payment-gateway-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 16px;
+      max-width: 100%;
+      
+      @media (max-width: 1024px) {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      
+      @media (max-width: 768px) {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+      }
+      
+      @media (max-width: 480px) {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
     }
 
     .payment-btn {
@@ -165,6 +188,7 @@ import { NotificationService } from '../../../services/notification.service';
       color: var(--color-text);
       font-size: 0.9rem;
       font-weight: 500;
+      min-height: 120px;
     }
 
     .payment-btn svg {
@@ -175,22 +199,25 @@ import { NotificationService } from '../../../services/notification.service';
     .payment-btn:hover {
       border-color: var(--color-primary);
       background: rgba(0, 0, 0, 0.05);
+      transform: translateY(-2px);
     }
 
     .payment-btn.active {
       border-color: var(--color-primary);
       background: var(--color-primary);
       color: white;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
   `]
 })
-export class CheckoutComponent {
+export class CheckoutComponent implements OnInit {
   private fb = inject(FormBuilder);
   private cartService = inject(CartService);
   private orderService = inject(OrderService);
   private authService = inject(AuthService);
   private paymentService = inject(PaymentService);
   private notificationService = inject(NotificationService);
+  private addressService = inject(AddressService);
   private router = inject(Router);
 
   cart = this.cartService.cart;
@@ -198,7 +225,11 @@ export class CheckoutComponent {
   errorMsg = '';
 
   selectedPaymentGateway = signal<PaymentGateway>('stripe');
-  paymentMethods = () => this.paymentService.getAvailableGateways();
+  paymentMethods = () => {
+    const methods = this.paymentService.getAvailableGateways();
+    console.log('Available payment methods:', methods);
+    return methods;
+  };
 
   checkoutForm = this.fb.group({
     address: ['', Validators.required],
@@ -207,10 +238,58 @@ export class CheckoutComponent {
     paymentMethod: ['stripe', Validators.required]
   });
 
+  ngOnInit() {
+    // Load last used address if available
+    const lastAddress = this.addressService.lastUsedAddress();
+    if (lastAddress) {
+      this.checkoutForm.patchValue({
+        address: lastAddress.street,
+        city: lastAddress.city,
+        zip: lastAddress.zipCode
+      });
+      this.notificationService.info(`Loaded last used address: ${lastAddress.city}`);
+    }
+
+    // Load user's saved addresses
+    const userId = this.authService.currentUserId;
+    if (userId) {
+      this.addressService.getUserAddresses(userId).subscribe();
+    }
+  }
+
   selectGateway(gateway: PaymentGateway) {
     this.selectedPaymentGateway.set(gateway);
     this.paymentService.setGateway(gateway);
     this.notificationService.info(`Payment method changed to ${gateway.toUpperCase()}`);
+  }
+
+  private isSameAddress(formVal: any, address: { street?: string; city?: string; zipCode?: string } | null): boolean {
+    if (!address) return false;
+    return (
+      (address.street || '').trim().toLowerCase() === (formVal.address || '').trim().toLowerCase() &&
+      (address.city || '').trim().toLowerCase() === (formVal.city || '').trim().toLowerCase() &&
+      (address.zipCode || '').trim().toLowerCase() === (formVal.zip || '').trim().toLowerCase()
+    );
+  }
+
+  private resolveAddressId(formVal: any, userId: number) {
+    const lastUsed = this.addressService.lastUsedAddress();
+    if (lastUsed?.id && this.isSameAddress(formVal, lastUsed)) {
+      this.addressService.setLastUsedAddress(lastUsed);
+      return of(lastUsed.id);
+    }
+
+    return this.addressService.addAddress({
+      userId,
+      type: 'SHIPPING',
+      street: formVal.address || '',
+      city: formVal.city || '',
+      zipCode: formVal.zip || '',
+      country: 'India',
+      isDefault: true
+    }).pipe(
+      switchMap((saved) => of(saved.id))
+    );
   }
 
   placeOrder() {
@@ -237,24 +316,31 @@ export class CheckoutComponent {
        return;
     }
 
-    const orderPayload = {
-      userId,
-      shippingAddressId: null,
-      billingAddressId: null,
-      paymentMethodId: null,
-      shippingMethod: 'STANDARD',
-      notes: `Ship to: ${fullAddress} | Payment: ${this.selectedPaymentGateway()}`,
-      items: this.cart().items.map(i => ({
-        productId: i.productId,
-        quantity: i.quantity,
-        size: i.size || 'M',
-        color: i.color || 'Black'
-      }))
-    };
+    this.resolveAddressId(formVal, userId).pipe(
+      switchMap((addressId) => {
+        const orderPayload: any = {
+          totalAmount: this.cart().total,
+          discountAmount: 0,
+          shippingCost: 5.99,
+          taxAmount: Math.round((this.cart().total * 0.1) * 100) / 100, // 10% tax
+          notes: fullAddress,
+          shippingAddressId: addressId,
+          billingAddressId: addressId,
+          orderItems: this.cart().items.map(i => ({
+            productId: i.productId,
+            quantity: i.quantity,
+            unitPrice: i.price || 0,
+            discountPrice: 0,
+            totalPrice: (i.price || 0) * i.quantity,
+            size: i.size || 'M',
+            color: i.color || 'Black'
+          }))
+        };
 
-    console.log('Sending Order Payload:', orderPayload);
-
-    this.orderService.createOrder(orderPayload).subscribe({
+        console.log('Sending Order Payload:', JSON.stringify(orderPayload, null, 2));
+        return this.orderService.createOrder(orderPayload, userId);
+      })
+    ).subscribe({
       next: (res) => {
         const orderId = res.id || res.orderNumber;
         this.notificationService.success(`Order created successfully! ID: ${orderId}`);
@@ -263,8 +349,11 @@ export class CheckoutComponent {
         this.processPayment(orderId, this.cart().total);
       },
       error: (err) => {
-        console.error(err);
-        this.errorMsg = 'Failed to place order. ' + (err.error?.message || err.message);
+        console.error('Order creation error:', err);
+        console.error('Error status:', err.status);
+        console.error('Error body:', err.error);
+        const errorDetails = err.error?.message || err.error?.error || err.message || 'Unknown error';
+        this.errorMsg = 'Failed to place order. ' + errorDetails;
         this.notificationService.error(this.errorMsg);
         this.loading = false;
       }
@@ -290,10 +379,9 @@ export class CheckoutComponent {
         } else {
           // Payment successful
           this.notificationService.success('Payment completed successfully!');
-          this.cartService.clearLocalCart();
-          setTimeout(() => {
+          this.cartService.clearCart().subscribe(() => {
             this.router.navigate(['/account']);
-          }, 1500);
+          });
         }
         this.loading = false;
       },

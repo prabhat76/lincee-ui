@@ -27,7 +27,9 @@
           <span>{{ item.category }}</span>
           <span class="stock-status">In Stock</span>
         </div>
-        <div class="empty" *ngIf="shopItems().length === 0">No items in shop</div>
+        <div class="empty-state" *ngIf="shopItems().length === 0">
+          <p>No items in shop. Add products to see them here.</p>
+        </div>
       </div>
       <div class="loading" *ngIf="loadingShopItems()">Loading shop items...</div>
     </section>
@@ -62,7 +64,7 @@
           <span>Category</span>
           <span>Actions</span>
         </div>
-        <div class="table-row" *ngFor="let product of products()">
+        <div class="table-row" *ngFor="let product of getDisplayedProducts()">
           <span>{{ product.name }}</span>
           <span>{{ product.price | currency }}</span>
           <span>{{ product.category }}</span>
@@ -71,8 +73,20 @@
             <button class="btn-text danger" (click)="deleteProduct(product.id)">Delete</button>
           </div>
         </div>
+        <div class="empty-state" *ngIf="products().length === 0">
+          <p>No products available. Create your first product above.</p>
+        </div>
+      </div>
+      <div class="empty-state" *ngIf="!loadingProducts() && products().length === 0">
+        <p>No products available. Create your first product above.</p>
       </div>
       <div class="loading" *ngIf="loadingProducts()">Loading products...</div>
+
+      <div class="show-all-container" *ngIf="products().length > 5">
+        <button class="btn btn-secondary" (click)="toggleShowAllProducts()">
+          {{ showAllProducts() ? 'Show Less' : 'Show All Products' }} ({{ products().length }} total)
+        </button>
+      </div>
     </section>
 
     <section class="admin-section">
@@ -106,6 +120,12 @@
             <button class="btn-text" (click)="updateOrderStatus(order, nextStatus.value, trackingNumber.value)">Update</button>
           </div>
         </div>
+        <div class="empty-state" *ngIf="orders().length === 0">
+          <p>No orders found. Orders will appear here once customers place them.</p>
+        </div>
+      </div>
+      <div class="empty-state" *ngIf="!loadingOrders() && orders().length === 0">
+        <p>No orders found. Orders will appear here once customers place them.</p>
       </div>
       <div class="loading" *ngIf="loadingOrders()">Loading orders...</div>
     </section>

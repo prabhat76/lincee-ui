@@ -92,4 +92,23 @@ export class AccountComponent implements OnInit {
   getOrderItems(order: Order): any[] {
     return (order as any).orderItems || (order as any).items || [];
   }
+
+  // Stepper helper methods
+  getStepIndex(status: string): number {
+    const steps = ['PENDING', 'CONFIRMED', 'SHIPPED', 'DELIVERED'];
+    return steps.indexOf(status);
+  }
+
+  isStepCompleted(order: Order, step: string): boolean {
+    if (order.status === 'CANCELLED') {
+      return step === 'PENDING'; // Only first step completed for cancelled orders
+    }
+    const currentIndex = this.getStepIndex(order.status || 'PENDING');
+    const stepIndex = this.getStepIndex(step);
+    return currentIndex > stepIndex;
+  }
+
+  isStepActive(order: Order, step: string): boolean {
+    return order.status === step;
+  }
 }

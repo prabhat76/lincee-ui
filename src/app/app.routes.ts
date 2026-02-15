@@ -8,6 +8,9 @@ import { CheckoutComponent } from './components/pages/checkout/checkout.componen
 import { ProductDetailsComponent } from './components/products/product-details/product-details';
 import { AccountComponent } from './components/pages/account/account';
 import { AdminComponent } from './components/pages/admin/admin.component';
+import { OrderDetailComponent } from './components/pages/order-detail/order-detail';
+import { ForgotPasswordComponent } from './components/pages/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './components/pages/reset-password/reset-password.component';
 
 export const routes: Routes = [
   {
@@ -18,10 +21,13 @@ export const routes: Routes = [
       { path: 'products/:id', component: ProductDetailsComponent },
       { path: 'cart', component: CartComponent },
       { path: 'checkout', component: CheckoutComponent },
-      { path: 'account', component: AccountComponent }, // New route
+      { path: 'account', component: AccountComponent },
+      { path: 'orders/:id', component: OrderDetailComponent },
       { path: 'admin', component: AdminComponent },
       { path: 'login', component: LoginComponent },
       { path: 'register', component: RegisterComponent },
+      { path: 'forgot-password', component: ForgotPasswordComponent },
+      { path: 'reset-password', component: ResetPasswordComponent },
     ]
   },
   { path: '**', redirectTo: '', pathMatch: 'full' } // Wildcard route

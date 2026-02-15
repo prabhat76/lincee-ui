@@ -13,6 +13,16 @@ export interface Product {
   imageUrls?: string[];
 }
 
+export interface PaginatedResponse<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
+  first: boolean;
+  last: boolean;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -27,6 +37,31 @@ export class ProductService {
         if (!response) return [];
         const items = Array.isArray(response) ? response : (response.content || response.data || response.results || []);
         return items.map((p: any) => this.transformProduct(p));
+      })
+    );
+  }
+
+  getProductsPaginated(page: number = 0, size: number = 20): Observable<PaginatedResponse<Product>> {
+    return this.apiService.get<any>(`products?page=${page}&size=${size}`, { skipAuth: true }).pipe(
+      tap(response => console.log('Paginated Products API Response:', response)),
+      map(response => {
+        if (!response) {
+          return { content: [], totalElements: 0, totalPages: 0, size, number: page, first: true, last: true };
+        }
+        // Handle different response formats
+        const content = Array.isArray(response) ? response : (response.content || response.data || response.results || []);
+        const totalElements = response.totalElements || response.total || content.length;
+        const totalPages = response.totalPages || Math.ceil(totalElements / size);
+        
+        return {
+          content: content.map((p: any) => this.transformProduct(p)),
+          totalElements,
+          totalPages,
+          size: response.size || size,
+          number: response.number || page,
+          first: response.first ?? (page === 0),
+          last: response.last ?? (page >= totalPages - 1)
+        };
       })
     );
   }

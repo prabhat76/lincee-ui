@@ -1,32 +1,32 @@
 .secondary-banner {
   background: var(--color-surface); /* Use theme color */
-  min-height: clamp(420px, 70vh, 720px);
+  min-height: clamp(600px, 85vh, 900px);
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   overflow: hidden;
-  padding: 90px 40px;
+  padding: 120px 40px;
   text-align: center;
   color: var(--color-text-heading);
   scroll-margin-top: 120px;
 
   @media (max-width: 1024px) {
-    min-height: clamp(380px, 62vh, 640px);
-    padding: 70px 30px;
+    min-height: clamp(520px, 75vh, 800px);
+    padding: 100px 30px;
   }
 
   @media (max-width: 768px) {
     /* Reduce height constraint on mobile to prevent excessive cropping */
-    min-height: clamp(360px, 58vh, 560px);
-    padding: 60px 20px;
+    min-height: clamp(450px, 70vh, 700px);
+    padding: 80px 20px;
   }
 
   @media (max-width: 480px) {
     /* Allow content to define height on very small screens to avoid cutting text */
-    min-height: auto;
-    padding: 50px 16px;
+    min-height: 420px;
+    padding: 70px 16px;
   }
 }
 

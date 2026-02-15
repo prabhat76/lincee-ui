@@ -136,4 +136,12 @@ export class AuthService {
   getToken(): string | null {
     return localStorage.getItem('token');
   }
+
+  requestPasswordReset(email: string) {
+    return this.apiService.post('auth/forgot-password', { email });
+  }
+
+  resetPassword(token: string, password: string) {
+    return this.apiService.post('auth/reset-password', { token, password });
+  }
 }

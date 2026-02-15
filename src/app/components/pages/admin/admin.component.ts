@@ -29,6 +29,7 @@ export class AdminComponent implements OnInit {
   loadingOrders = signal(false);
   loadingShopItems = signal(false);
   error = signal<string | null>(null);
+  showAllProducts = signal(false);
 
   statusFilter = signal('PENDING');
   statusOptions = ['PENDING', 'CONFIRMED', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
@@ -173,6 +174,15 @@ export class AdminComponent implements OnInit {
         this.notificationService.error('Failed to delete product.');
       }
     });
+  }
+
+  toggleShowAllProducts() {
+    this.showAllProducts.set(!this.showAllProducts());
+  }
+
+  getDisplayedProducts(): Product[] {
+    const allProducts = this.products();
+    return this.showAllProducts() ? allProducts : allProducts.slice(0, 5);
   }
 
   updateOrderStatus(order: Order, status: string, trackingNumber?: string) {

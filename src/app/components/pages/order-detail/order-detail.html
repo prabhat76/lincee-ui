@@ -1,0 +1,135 @@
+<div class="order-detail-container">
+  <div class="container">
+    <button class="back-btn" (click)="goBack()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+      </svg>
+      Back to Orders
+    </button>
+
+    <div *ngIf="loading()" class="loading">
+      <div class="spinner"></div>
+      <p>Loading order details...</p>
+    </div>
+
+    <div *ngIf="error()" class="error-msg">{{ error() }}</div>
+
+    <div *ngIf="!loading() && order() as order" class="order-details">
+      <!-- Header -->
+      <div class="order-header-section">
+        <div class="order-header-content">
+          <h1>Order #{{ order.id }}</h1>
+          <span class="order-date" *ngIf="order.createdAt">{{ order.createdAt | date:'longDate' }}</span>
+        </div>
+        <span class="status-badge" [ngClass]="order.status?.toLowerCase()">{{ getStatusLabel(order.status) }}</span>
+      </div>
+
+      <!-- Progress Stepper -->
+      <div class="stepper-section">
+        <h3>Order Status</h3>
+        <div class="order-stepper-large">
+          <div class="stepper-step" [class.completed]="isStepCompleted(order, 'PENDING')" [class.active]="isStepActive(order, 'PENDING')">
+            <div class="step-circle">
+              <svg *ngIf="isStepCompleted(order, 'PENDING')" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span *ngIf="!isStepCompleted(order, 'PENDING')">1</span>
+            </div>
+            <div class="step-label">Order Placed</div>
+            <div class="step-date" *ngIf="order.createdAt">{{ order.createdAt | date:'short' }}</div>
+          </div>
+
+          <div class="stepper-line" [class.completed]="isStepCompleted(order, 'CONFIRMED')"></div>
+
+          <div class="stepper-step" [class.completed]="isStepCompleted(order, 'CONFIRMED')" [class.active]="isStepActive(order, 'CONFIRMED')">
+            <div class="step-circle">
+              <svg *ngIf="isStepCompleted(order, 'CONFIRMED')" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span *ngIf="!isStepCompleted(order, 'CONFIRMED')">2</span>
+            </div>
+            <div class="step-label">Confirmed</div>
+          </div>
+
+          <div class="stepper-line" [class.completed]="isStepCompleted(order, 'SHIPPED')"></div>
+
+          <div class="stepper-step" [class.completed]="isStepCompleted(order, 'SHIPPED')" [class.active]="isStepActive(order, 'SHIPPED')">
+            <div class="step-circle">
+              <svg *ngIf="isStepCompleted(order, 'SHIPPED')" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span *ngIf="!isStepCompleted(order, 'SHIPPED')">3</span>
+            </div>
+            <div class="step-label">Shipped</div>
+          </div>
+
+          <div class="stepper-line" [class.completed]="isStepCompleted(order, 'DELIVERED')"></div>
+
+          <div class="stepper-step" [class.completed]="isStepCompleted(order, 'DELIVERED')" [class.active]="isStepActive(order, 'DELIVERED')" [class.cancelled]="order.status === 'CANCELLED'">
+            <div class="step-circle">
+              <svg *ngIf="isStepCompleted(order, 'DELIVERED') || order.status === 'CANCELLED'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline *ngIf="order.status !== 'CANCELLED'" points="20 6 9 17 4 12"></polyline>
+                <g *ngIf="order.status === 'CANCELLED'">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </g>
+              </svg>
+              <span *ngIf="!isStepCompleted(order, 'DELIVERED') && order.status !== 'CANCELLED'">4</span>
+            </div>
+            <div class="step-label">{{ order.status === 'CANCELLED' ? 'Cancelled' : 'Delivered' }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order Items -->
+      <div class="items-section">
+        <h3>Order Items</h3>
+        <div class="items-grid">
+          <div *ngFor="let item of getOrderItems(order)" class="item-card">
+            <div class="item-info">
+              <div class="item-name">Product ID: {{ item.productId }}</div>
+              <div class="item-specs" *ngIf="item.size || item.color">
+                <span *ngIf="item.size">Size: {{ item.size }}</span>
+                <span *ngIf="item.color">Color: {{ item.color }}</span>
+              </div>
+              <div class="item-quantity">Quantity: {{ item.quantity }}</div>
+            </div>
+            <div class="item-price">{{ (item.price || 0) * item.quantity | currency }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order Summary -->
+      <div class="summary-section">
+        <div class="summary-row">
+          <span class="summary-label">Subtotal:</span>
+          <span class="summary-value">{{ order.totalAmount | currency }}</span>
+        </div>
+        <div class="summary-row highlight">
+          <span class="summary-label">Total Amount:</span>
+          <span class="summary-value">{{ order.totalAmount | currency }}</span>
+        </div>
+      </div>
+
+      <!-- Shipping Details -->
+      <div class="shipping-section">
+        <h3>Shipping Details</h3>
+        <div class="shipping-info">
+          <div class="shipping-row">
+            <span class="label">Address:</span>
+            <span class="value">{{ getAddress(order) }}</span>
+          </div>
+          <div class="shipping-row">
+            <span class="label">Payment Method:</span>
+            <span class="value">{{ order.paymentMethod || 'Not specified' }}</span>
+          </div>
+          <div class="shipping-row">
+            <span class="label">Order Status:</span>
+            <span class="value" [class.status]="true" [ngClass]="order.status?.toLowerCase()">{{ getStatusLabel(order.status) }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

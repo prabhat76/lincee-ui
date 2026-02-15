@@ -1,8 +1,8 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { ApiService } from '../core/api.service';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 
-export type PaymentGateway = 'stripe' | 'phonepay' | 'gpay' | 'paypal';
+export type PaymentGateway = 'stripe' | 'phonepay' | 'gpay' | 'paypal' | 'cod';
 
 export interface PaymentMethod {
   gateway: PaymentGateway;
@@ -40,7 +40,8 @@ export class PaymentService {
     { gateway: 'stripe', name: 'Stripe', icon: 'stripe', enabled: true },
     { gateway: 'phonepay', name: 'PhonePay', icon: 'phonepay', enabled: true },
     { gateway: 'gpay', name: 'Google Pay', icon: 'gpay', enabled: true },
-    { gateway: 'paypal', name: 'PayPal', icon: 'paypal', enabled: true }
+    { gateway: 'paypal', name: 'PayPal', icon: 'paypal', enabled: true },
+    { gateway: 'cod', name: 'Cash on Delivery', icon: 'cod', enabled: true }
   ];
 
   setGateway(gateway: PaymentGateway) {
@@ -63,6 +64,8 @@ export class PaymentService {
         return this.initiateGPayPayment(request);
       case 'paypal':
         return this.initiatePayPalPayment(request);
+      case 'cod':
+        return this.initiateCODPayment(request);
       default:
         throw new Error(`Unsupported payment gateway: ${gateway}`);
     }
@@ -109,6 +112,18 @@ export class PaymentService {
       orderId,
       gateway,
       transactionId
+    });
+  }
+
+  private initiateCODPayment(request: PaymentRequest): Observable<PaymentResponse> {
+    // COD doesn't require payment gateway processing
+    // Return immediate success response
+    return of({
+      success: true,
+      transactionId: `COD-${request.orderId}-${Date.now()}`,
+      orderId: request.orderId,
+      status: 'PENDING',
+      message: 'Cash on Delivery order placed successfully. Pay when you receive your order.'
     });
   }
 }

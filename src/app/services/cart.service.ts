@@ -217,6 +217,27 @@ export class CartService {
     this.cartState.set({ items: [], total: 0 });
   }
 
+  clearCart(): Observable<any> {
+    const userId = this.authService.currentUserId;
+    this.clearLocalCart();
+
+    if (!userId) {
+      return of(true);
+    }
+
+    return this.apiService.delete(`cart/user/${userId}`).pipe(
+      tap(() => {
+        this.notificationService.success('Cart cleared');
+        this.clearLocalCart();
+      }),
+      catchError(err => {
+        console.error('Failed to clear cart', err);
+        this.notificationService.error('Failed to clear cart');
+        return of(true);
+      })
+    );
+  }
+
   updateQuantity(productId: number, change: number) {
     const currentCart = this.cartState();
     const item = currentCart.items.find(i => i.productId === productId);

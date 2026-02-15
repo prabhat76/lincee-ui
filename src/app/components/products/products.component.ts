@@ -2,7 +2,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { ProductService, Product } from '../../services/product.service';
+import { ProductService, Product, PaginatedResponse } from '../../services/product.service';
 import { CartService } from '../../services/cart.service';
 
 interface CategoryGroup {
@@ -27,24 +27,47 @@ export class ProductsComponent implements OnInit {
   filteredGroups = signal<CategoryGroup[]>([]);
   searchQuery = signal<string>('');
   loading = signal<boolean>(true);
+  loadingMore = signal<boolean>(false);
+  
+  // Pagination
+  currentPage = signal<number>(0);
+  pageSize = 20;
+  hasMore = signal<boolean>(true);
+  totalProducts = signal<number>(0);
 
   // Track adding state per product ID
   addingState: { [key: number]: boolean } = {};
   private searchTimeout: any;
 
   ngOnInit() {
-    this.productService.getProducts().subscribe({
-      next: (products) => {
-        console.log('Products loaded in component:', products);
-        this.allProducts = products;
+    this.loadProducts();
+  }
+
+  loadProducts() {
+    this.productService.getProductsPaginated(this.currentPage(), this.pageSize).subscribe({
+      next: (response: PaginatedResponse<Product>) => {
+        console.log('Products loaded in component:', response);
+        this.allProducts = [...this.allProducts, ...response.content];
+        this.totalProducts.set(response.totalElements);
+        this.hasMore.set(!response.last);
         this.applyFilter();
         this.loading.set(false);
+        this.loadingMore.set(false);
       },
       error: (err) => {
         console.error(err);
         this.loading.set(false);
+        this.loadingMore.set(false);
       }
     });
+  }
+
+  loadMore() {
+    if (this.hasMore() && !this.loadingMore()) {
+      this.loadingMore.set(true);
+      this.currentPage.set(this.currentPage() + 1);
+      this.loadProducts();
+    }
   }
 
   onSearch(query: any) {
@@ -80,7 +103,7 @@ export class ProductsComponent implements OnInit {
     const result: CategoryGroup[] = Object.keys(groups).map(cat => ({
       name: cat,
       products: groups[cat],
-      visibleCount: 2 // Requirement: Load only 2 initially
+      visibleCount: groups[cat].length // Show all products in each category by default
     }));
 
     // Sort categories if needed (optional)

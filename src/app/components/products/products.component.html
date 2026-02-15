@@ -56,5 +56,13 @@
     <div *ngIf="!loading() && filteredGroups().length === 0" class="no-results">
         No products found matching "{{ searchQuery() }}"
     </div>
+
+    <!-- Load More Button -->
+    <div class="load-more-container" *ngIf="!loading() && hasMore() && !searchQuery()">
+      <button class="btn btn-primary" (click)="loadMore()" [disabled]="loadingMore()">
+        <span *ngIf="!loadingMore()">Load More Products ({{ allProducts.length }} of {{ totalProducts() }})</span>
+        <div *ngIf="loadingMore()" class="btn-spinner"></div>
+      </button>
+    </div>
   </div>
 </section>

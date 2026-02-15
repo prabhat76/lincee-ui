@@ -18,6 +18,8 @@ export interface Order {
   status: string; // PENDING, CONFIRMED, SHIPPED, DELIVERED
   shippingAddress: string;
   paymentMethod: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 @Injectable({
@@ -26,8 +28,9 @@ export interface Order {
 export class OrderService {
   private apiService = inject(ApiService);
 
-  createOrder(orderData: any): Observable<any> {
-    return this.apiService.post('orders', orderData).pipe(
+  createOrder(orderData: any, userId?: number): Observable<any> {
+    const endpoint = userId ? `orders?userId=${encodeURIComponent(userId)}` : 'orders';
+    return this.apiService.post(endpoint, orderData).pipe(
       catchError(err => {
         console.error('Failed to create order', err);
         return throwError(() => err);
@@ -48,6 +51,19 @@ export class OrderService {
       catchError(err => {
         console.error(`Failed to load orders for user ${userId}`, err);
         return of([]);
+      })
+    );
+  }
+
+  getOrder(orderId: number): Observable<Order> {
+    return this.apiService.get<any>(`orders/${orderId}`).pipe(
+      map((data: any) => ({
+        ...data,
+        orderItems: data.orderItems || data.items || []
+      })),
+      catchError(err => {
+        console.error(`Failed to load order ${orderId}`, err);
+        return throwError(() => err);
       })
     );
   }
