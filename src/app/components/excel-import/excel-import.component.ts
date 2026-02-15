@@ -656,22 +656,47 @@ export class ExcelImportComponent {
 
   downloadTemplate(): void {
     this.downloading.set(true);
+    console.log('📥 Starting template download...');
+    
     this.excelService.downloadTemplate().subscribe({
-      next: (response: any) => {
-        // Convert response to blob if it's not already
-        const blob = response instanceof Blob ? response : new Blob([JSON.stringify(response)], { type: 'application/octet-stream' });
-        const url = URL.createObjectURL(blob);
+      next: (blob: Blob) => {
+        console.log('✅ Template downloaded, size:', blob.size, 'bytes');
+        
+        if (blob.size === 0) {
+          console.error('❌ Downloaded file is empty');
+          this.notificationService.error('Downloaded template is empty');
+          this.downloading.set(false);
+          return;
+        }
+        
+        // Create download link
+        const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
         link.download = 'product-import-template.xlsx';
+        document.body.appendChild(link);
         link.click();
-        URL.revokeObjectURL(url);
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        
         this.notificationService.success('Template downloaded successfully');
         this.downloading.set(false);
       },
       error: (err: any) => {
-        console.error('Download error:', err);
-        this.notificationService.error('Failed to download template');
+        console.error('❌ Download error:', err);
+        console.error('Error status:', err.status);
+        console.error('Error message:', err.message);
+        
+        let errorMsg = 'Failed to download template';
+        if (err.status === 404) {
+          errorMsg = 'Template endpoint not found (404)';
+        } else if (err.status === 401) {
+          errorMsg = 'Authentication required. Please login again.';
+        } else if (err.status === 500) {
+          errorMsg = 'Server error. Please try again later.';
+        }
+        
+        this.notificationService.error(errorMsg);
         this.downloading.set(false);
       }
     });
@@ -698,11 +723,21 @@ export class ExcelImportComponent {
 
   validateFile(): void {
     const file = this.selectedFile();
+    
+    if (!file) {
+      this.notificationService.error('Please select a file first');
+      return;
+    }
+    
+    console.log('🔍 Validating file:', file.name, `(${(file.size / 1024).toFixed(2)} KB)`);
     if (!file) return;
 
     this.validating.set(true);
+    
     this.excelService.validateExcelFile(file).subscribe({
       next: (response: ExcelValidationResponse) => {
+        console.log('✅ Validation response:', response);
+        
         if (response.valid) {
           this.fileValidated.set(true);
           this.validationSuccess.set('✓ File is valid and ready to import');
@@ -716,10 +751,20 @@ export class ExcelImportComponent {
         this.validating.set(false);
       },
       error: (err: any) => {
-        console.error('Validation error:', err);
-        this.validationError.set('Failed to validate file');
+        console.error('❌ Validation error:', err);
+        console.error('Error status:', err.status);
+        console.error('Error body:', err.error);
+        
+        let errorMsg = 'Failed to validate file';
+        if (err.status === 400) {
+          errorMsg = err.error?.message || 'Invalid Excel file format';
+        } else if (err.status === 401) {
+          errorMsg = 'Authentication required';
+        }
+        
+        this.validationError.set(errorMsg);
         this.fileValidated.set(false);
-        this.notificationService.error('File validation failed');
+        this.notificationService.error(errorMsg);
         this.validating.set(false);
       }
     });
@@ -729,9 +774,15 @@ export class ExcelImportComponent {
     const file = this.selectedFile();
     if (!file || !this.fileValidated()) return;
 
+    console.log('📤 Starting Excel import for file:', file.name);
     this.importing.set(true);
+    
     this.excelService.importProductsFromExcel(file).subscribe({
       next: (response: ExcelImportResponse) => {
+        console.log('✅ Import response:', response);
+        console.log('Success count:', response.successCount);
+        console.log('Error count:', response.errorCount);
+        
         this.importResult.set(response);
         this.importCompleted.set(true);
         this.productImported.emit(response);
@@ -743,6 +794,7 @@ export class ExcelImportComponent {
         }
 
         if (response.errorCount > 0) {
+          console.warn('Import errors:', response.errors);
           this.notificationService.warning(
             `${response.errorCount} products failed to import`
           );
@@ -751,8 +803,20 @@ export class ExcelImportComponent {
         this.importing.set(false);
       },
       error: (err: any) => {
-        console.error('Import error:', err);
-        this.notificationService.error('Failed to import products');
+        console.error('❌ Import error:', err);
+        console.error('Error status:', err.status);
+        console.error('Error body:', err.error);
+        
+        let errorMsg = 'Failed to import products';
+        if (err.status === 400) {
+          errorMsg = err.error?.message || 'Invalid Excel data';
+        } else if (err.status === 401) {
+          errorMsg = 'Authentication required';
+        } else if (err.status === 500) {
+          errorMsg = 'Server error during import';
+        }
+        
+        this.notificationService.error(errorMsg);
         this.importing.set(false);
       }
     });

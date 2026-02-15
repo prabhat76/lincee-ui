@@ -49,4 +49,14 @@ export class ApiService {
       headers: this.getHeaders(options?.skipAuth)
     });
   }
+
+  /**
+   * Download blob response (for files like Excel, PDFs, etc.)
+   */
+  downloadBlob(endpoint: string, options?: { skipAuth?: boolean }): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/${endpoint}`, {
+      headers: this.getHeaders(options?.skipAuth),
+      responseType: 'blob'
+    });
+  }
 }

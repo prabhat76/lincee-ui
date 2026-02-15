@@ -9,11 +9,11 @@
 
 .header {
   padding: 0; 
-  background-color: transparent;
-  color: #fff;
+  background-color: rgba(255, 255, 255, 0.95);
+  color: var(--color-text);
   transition: all var(--transition-duration-normal) ease;
-  backdrop-filter: blur(0px);
-  box-shadow: none;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 
   .announcement-bar {
     background: linear-gradient(135deg, var(--color-primary) 0%, #8b5cf6 100%);
@@ -177,12 +177,15 @@
     border: none;
     border-radius: 50%;
     position: relative;
+    background: transparent;
+    text-decoration: none;
     
     svg {
       width: 22px;
       height: 22px;
       stroke: currentColor;
-      stroke-width: 1.5;
+      stroke-width: 2;
+      fill: none;
       transition: all 0.3s ease;
     }
     
@@ -260,6 +263,23 @@
     to {
       opacity: 1;
       transform: translateY(0);
+    }
+  }
+
+  // Logout button styling
+  .logout-btn {
+    color: currentColor !important;
+    background: transparent !important;
+    border: none !important;
+    cursor: pointer;
+    
+    svg {
+      stroke: currentColor !important;
+      fill: none !important;
+    }
+    
+    &:hover {
+      opacity: 0.8;
     }
   }
 

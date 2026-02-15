@@ -30,8 +30,9 @@ export class ExcelImportService {
   /**
    * Download Excel template for bulk product import
    */
-  downloadTemplate(): Observable<any> {
-    return this.apiService.get('admin/products/template/excel', { 
+  downloadTemplate(): Observable<Blob> {
+    console.log('📥 Downloading Excel template from API...');
+    return this.apiService.downloadBlob('admin/products/template/excel', { 
       skipAuth: false
     });
   }
