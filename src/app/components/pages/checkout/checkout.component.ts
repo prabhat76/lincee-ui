@@ -8,7 +8,7 @@ import { AuthService } from '../../../services/auth.service';
 import { PaymentService, PaymentGateway } from '../../../services/payment.service';
 import { NotificationService } from '../../../services/notification.service';
 import { AddressService } from '../../../services/address.service';
-import { of, switchMap } from 'rxjs';
+import { of, switchMap, catchError, tap } from 'rxjs';
 
 @Component({
   selector: 'app-checkout',
@@ -275,20 +275,34 @@ export class CheckoutComponent implements OnInit {
   private resolveAddressId(formVal: any, userId: number) {
     const lastUsed = this.addressService.lastUsedAddress();
     if (lastUsed?.id && this.isSameAddress(formVal, lastUsed)) {
+      console.log('♻️ Checkout: Reusing existing address ID:', lastUsed.id);
       this.addressService.setLastUsedAddress(lastUsed);
       return of(lastUsed.id);
     }
 
-    return this.addressService.addAddress({
+    console.log('📍 Checkout: Creating new address for userId:', userId);
+    const addressPayload = {
       userId,
-      type: 'SHIPPING',
+      type: 'SHIPPING' as const,
       street: formVal.address || '',
       city: formVal.city || '',
+      state: '', // Optional but may be required by backend
       zipCode: formVal.zip || '',
       country: 'India',
+      phoneNumber: '', // Optional but may be required by backend
       isDefault: true
-    }).pipe(
-      switchMap((saved) => of(saved.id))
+    };
+    
+    console.log('📦 Checkout: Address payload:', JSON.stringify(addressPayload, null, 2));
+    
+    return this.addressService.addAddress(addressPayload).pipe(
+      tap((saved) => console.log('✅ Checkout: Address ID resolved:', saved.id)),
+      switchMap((saved) => of(saved.id)),
+      catchError((err: any) => {
+        console.error('❌ Checkout: Address creation failed in resolveAddressId');
+        console.error('Error details:', err);
+        throw err;
+      })
     );
   }
 
@@ -316,8 +330,16 @@ export class CheckoutComponent implements OnInit {
        return;
     }
 
+    console.log('🚀 Checkout: Starting order creation process...');
+    console.log('📋 Form Values:', formVal);
+    console.log('👤 User ID:', userId);
+    console.log('🛒 Cart Total:', this.cart().total);
+    console.log('🛒 Cart Items Count:', this.cart().items.length);
+    
     this.resolveAddressId(formVal, userId).pipe(
       switchMap((addressId) => {
+        console.log('📍 Address ID resolved successfully:', addressId);
+        
         const orderPayload: any = {
           totalAmount: this.cart().total,
           discountAmount: 0,
@@ -337,21 +359,25 @@ export class CheckoutComponent implements OnInit {
           }))
         };
 
-        console.log('Sending Order Payload:', JSON.stringify(orderPayload, null, 2));
+        console.log('📦 Sending Order Payload:', JSON.stringify(orderPayload, null, 2));
         return this.orderService.createOrder(orderPayload, userId);
       })
     ).subscribe({
       next: (res) => {
         const orderId = res.id || res.orderNumber;
+        console.log('✅ Order created successfully! Order ID:', orderId);
         this.notificationService.success(`Order created successfully! ID: ${orderId}`);
         
         // Process payment
         this.processPayment(orderId, this.cart().total);
       },
       error: (err) => {
-        console.error('Order creation error:', err);
+        console.error('❌ Order creation error (FINAL CATCH):');
         console.error('Error status:', err.status);
+        console.error('Error message:', err.message);
         console.error('Error body:', err.error);
+        console.error('Full error:', JSON.stringify(err, null, 2));
+        
         const errorDetails = err.error?.message || err.error?.error || err.message || 'Unknown error';
         this.errorMsg = 'Failed to place order. ' + errorDetails;
         this.notificationService.error(this.errorMsg);

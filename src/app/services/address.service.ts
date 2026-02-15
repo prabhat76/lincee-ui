@@ -56,15 +56,27 @@ export class AddressService {
 
   // Save a new address
   addAddress(address: Address): Observable<SavedAddress> {
+    // Log the payload being sent
+    console.log('🔵 AddressService: Attempting to create address with payload:', JSON.stringify(address, null, 2));
+    
     return this.apiService.post<SavedAddress>('addresses', address).pipe(
       tap(newAddress => {
+        console.log('✅ AddressService: Address created successfully:', newAddress);
         const current = this.savedAddresses();
         this.savedAddresses.set([...current, newAddress]);
         this.setLastUsedAddress(newAddress);
       }),
       catchError(err => {
-        console.error('Failed to add address:', err);
-        throw err;
+        console.error('❌ AddressService: Failed to add address');
+        console.error('Error Status:', err.status);
+        console.error('Error Message:', err.message);
+        console.error('Error Body:', err.error);
+        console.error('Full Error Object:', JSON.stringify(err, null, 2));
+        
+        // Provide detailed error message
+        const errorMsg = err.error?.message || err.error?.error || err.message || 'Unknown server error';
+        const enhancedError = new Error(`Address creation failed: ${errorMsg} (Status: ${err.status})`);
+        throw enhancedError;
       })
     );
   }
