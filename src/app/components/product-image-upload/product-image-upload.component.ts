@@ -506,9 +506,12 @@ export class ProductImageUploadComponent {
     const file = input.files[0];
     this.uploadingView.set(this.selectedView);
 
-    this.imageUploadService.uploadSingleImage(file, this.selectedView).subscribe({
+    // Upload to 'products' folder
+    this.imageUploadService.uploadSingleImage(file, 'products').subscribe({
       next: (response: any) => {
         const result = response.body || response;
+        console.log('✅ Image upload response:', result);
+        
         const newImage: ProductImage = {
           view: this.selectedView,
           url: result.url,
@@ -522,8 +525,10 @@ export class ProductImageUploadComponent {
         this.clearForm();
       },
       error: (err: any) => {
-        console.error('Upload error:', err);
-        this.notificationService.error('Failed to upload image');
+        console.error('❌ Upload error:', err);
+        console.error('Error status:', err.status);
+        console.error('Error body:', err.error);
+        this.notificationService.error(err.error?.message || 'Failed to upload image');
         this.uploadingView.set(null);
       }
     });

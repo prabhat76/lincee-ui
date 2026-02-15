@@ -45,19 +45,25 @@ export class ImageUploadService {
       formData.append('productId', productId.toString());
     }
 
-    return this.apiService.post<UploadResponse[]>('products/upload-images', formData);
+    return this.apiService.post<UploadResponse[]>('images/upload', formData);
   }
 
   /**
    * Upload single image with progress tracking
+   * Uses the correct endpoint: POST /api/v1/images/upload
+   * Body: file (the image file), folder (optional, defaults to "products")
    */
-  uploadSingleImage(file: File, view: string): Observable<any> {
+  uploadSingleImage(file: File, folder: string = 'products'): Observable<any> {
     const formData = new FormData();
-    formData.append('image', file);
-    formData.append('view', view);
+    formData.append('file', file);
+    formData.append('folder', folder);
+
+    console.log('📤 Uploading image to /api/v1/images/upload');
+    console.log('📁 Folder:', folder);
+    console.log('📄 File:', file.name, `(${(file.size / 1024).toFixed(2)} KB)`);
 
     return this.http.post<UploadResponse>(
-      `${this.API_URL}/api/v1/products/upload-image`,
+      `${this.API_URL}/api/v1/images/upload`,
       formData,
       {
         reportProgress: true,
@@ -109,6 +115,6 @@ export class ImageUploadService {
    * Delete image from Cloudinary (via backend)
    */
   deleteImage(publicId: string): Observable<any> {
-    return this.apiService.delete(`products/delete-image/${publicId}`);
+    return this.apiService.delete(`images/${publicId}`);
   }
 }
