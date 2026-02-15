@@ -22,7 +22,7 @@
           <h1>Order #{{ order.id }}</h1>
           <span class="order-date" *ngIf="order.createdAt">{{ order.createdAt | date:'longDate' }}</span>
         </div>
-        <span class="status-badge" [ngClass]="order.status?.toLowerCase()">{{ getStatusLabel(order.status) }}</span>
+        <span class="status-badge" [ngClass]="order.status.toLowerCase()">{{ getStatusLabel(order.status) }}</span>
       </div>
 
       <!-- Progress Stepper -->
@@ -126,7 +126,7 @@
           </div>
           <div class="shipping-row">
             <span class="label">Order Status:</span>
-            <span class="value" [class.status]="true" [ngClass]="order.status?.toLowerCase()">{{ getStatusLabel(order.status) }}</span>
+            <span class="value" [class.status]="true" [ngClass]="order.status.toLowerCase()">{{ getStatusLabel(order.status) }}</span>
           </div>
         </div>
       </div>

@@ -28,7 +28,7 @@ import { NotificationService } from '../../services/notification.service';
       </div>
 
       <!-- Table -->
-      <div class="table" *ngIf="!isLoading()">
+      <div class="table" *ngIf="!isLoading() && !isFilterLoading()">
         <div class="table-header">
           <span class="col-order">Order ID</span>
           <span class="col-items">Items</span>
@@ -37,14 +37,14 @@ import { NotificationService } from '../../services/notification.service';
           <span class="col-actions">Update Status</span>
         </div>
 
-        <div class="table-row" *ngFor="let order of orders()" [attr.data-order-id]="order.id">
+        <div class="table-row" *ngFor="let order of displayedOrders()" [attr.data-order-id]="order.id">
           <span class="col-order">
             <strong>#{{ order.id }}</strong>
           </span>
           <span class="col-items">{{ getOrderItems(order).length }} item(s)</span>
           <span class="col-total">{{ order.totalAmount | currency }}</span>
           <span class="col-status">
-            <span [ngClass]="'status-' + order.status?.toLowerCase()">
+            <span [ngClass]=\"'status-' + order.status.toLowerCase()\">
               {{ order.status }}
             </span>
           </span>
@@ -77,13 +77,13 @@ import { NotificationService } from '../../services/notification.service';
         </div>
 
         <!-- Empty State -->
-        <div class="empty-state" *ngIf="orders().length === 0">
+        <div class="empty-state" *ngIf="displayedOrders().length === 0">
           <p>No orders found. Orders will appear here once customers place them.</p>
         </div>
       </div>
 
       <!-- Loading State -->
-      <div class="loading-state" *ngIf="isLoading()">
+      <div class="loading-state" *ngIf="isLoading() || isFilterLoading()">
         <div class="spinner"></div>
         <p>Loading orders...</p>
       </div>
@@ -411,8 +411,13 @@ export class OrdersSectionComponent {
   private orderService = inject(OrderService);
   private notificationService = inject(NotificationService);
 
+  // Input signals (read-only)
   orders = input<Order[]>([]);
   isLoading = input(false);
+
+  // Local writable signals for filtered display
+  displayedOrders = signal<Order[]>([]);
+  isFilterLoading = signal(false);
 
   currentStatus = signal('PENDING');
   statusOptions = ['PENDING', 'CONFIRMED', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
@@ -430,15 +435,25 @@ export class OrdersSectionComponent {
     'CANCELLED': []
   };
 
+  constructor() {
+    // Initialize displayedOrders with input orders
+    this.displayedOrders.set(this.orders());
+  }
+
   onStatusFilterChange(value: string): void {
     this.currentStatus.set(value);
+    this.isFilterLoading.set(true);
     this.orderService.getOrdersByStatus(value).subscribe({
       next: (orders) => {
-        // This would need to be passed back to parent or use a service
+        // Update the local displayedOrders signal with filtered results
+        this.displayedOrders.set(orders);
+        this.isFilterLoading.set(false);
+        console.log(`✅ Loaded ${orders.length} orders with status: ${value}`);
       },
       error: (err) => {
-        console.error('Failed to load orders:', err);
+        console.error('❌ Failed to load orders:', err);
         this.notificationService.error('Failed to load orders');
+        this.isFilterLoading.set(false);
       }
     });
   }

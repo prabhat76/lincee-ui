@@ -51,7 +51,7 @@ export class AdminComponent implements OnInit {
   // UI State
   error = signal<string | null>(null);
   showExcelImport = signal(false);
-  activeTab = signal<'shop' | 'banners' | 'products' | 'orders'>('shop');
+  activeTab = signal<'shop' | 'banners' | 'products' | 'orders'>('orders');
 
   ngOnInit() {
     // Check admin authorization
@@ -60,16 +60,26 @@ export class AdminComponent implements OnInit {
       return;
     }
 
-    this.loadAllData();
+    // Load data for the initial active tab only
+    this.loadDataForActiveTab();
   }
 
   /**
-   * Load all data (products, orders, shop items)
+   * Load data for the currently active tab
    */
-  private loadAllData(): void {
-    this.loadShopItems();
-    this.loadProducts();
-    this.loadOrders();
+  private loadDataForActiveTab(): void {
+    switch(this.activeTab()) {
+      case 'shop':
+        this.loadShopItems();
+        break;
+      case 'products':
+        this.loadProducts();
+        break;
+      case 'orders':
+        this.loadOrders();
+        break;
+      // 'banners' tab doesn't need initial loading - it loads its own data
+    }
   }
 
   /**
@@ -192,16 +202,22 @@ export class AdminComponent implements OnInit {
    */
   setActiveTab(tab: 'shop' | 'banners' | 'products' | 'orders'): void {
     this.activeTab.set(tab);
-    // Load data for the selected tab if needed
+    // Load data for the selected tab only if not already loaded
     switch(tab) {
       case 'shop':
-        if (this.shopItems().length === 0) this.loadShopItems();
+        if (this.shopItems().length === 0 && !this.loadingShopItems()) {
+          this.loadShopItems();
+        }
         break;
       case 'products':
-        if (this.products().length === 0) this.loadProducts();
+        if (this.products().length === 0 && !this.loadingProducts()) {
+          this.loadProducts();
+        }
         break;
       case 'orders':
-        if (this.orders().length === 0) this.loadOrders();
+        if (this.orders().length === 0 && !this.loadingOrders()) {
+          this.loadOrders();
+        }
         break;
     }
   }

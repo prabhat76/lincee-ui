@@ -9,23 +9,67 @@
   justify-content: center;
   position: relative;
   overflow: hidden;
-  margin-top: 0;
-  padding: 120px 0 120px;
+  margin-top: 76px;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  left: 50%;
+  right: 50%;
+  width: 100vw;
+  padding-top: 80px;
+  padding-bottom: 120px;
+  padding-left: 40px;
+  padding-right: 40px;
   text-align: left;
+
+  @media (max-width: 1440px) {
+    margin-top: 76px;
+    padding-top: 70px;
+    padding-bottom: 110px;
+  }
 
   @media (max-width: 1024px) {
     min-height: clamp(500px, 88vh, 860px);
-    padding: 100px 0 100px;
+    margin-top: 76px;
+    padding-top: 60px;
+    padding-bottom: 100px;
+    padding-left: 40px;
+    padding-right: 40px;
   }
 
   @media (max-width: 768px) {
     min-height: clamp(460px, 84vh, 760px);
-    padding: 80px 0 90px;
+    margin-top: 76px;
+    padding-top: 50px;
+    padding-bottom: 90px;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  @media (max-width: 640px) {
+    min-height: clamp(420px, 80vh, 680px);
+    margin-top: 76px;
+    padding-top: 45px;
+    padding-bottom: 80px;
+    padding-left: 16px;
+    padding-right: 16px;
   }
 
   @media (max-width: 480px) {
-    min-height: clamp(420px, 80vh, 680px);
-    padding: 70px 0 80px;
+    min-height: clamp(380px, 75vh, 620px);
+    margin-top: 76px;
+    padding-top: 40px;
+    padding-bottom: 70px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  @media (max-width: 375px) {
+    min-height: clamp(340px, 70vh, 580px);
+    margin-top: 76px;
+    padding-top: 35px;
+    padding-bottom: 60px;
+    padding-left: 10px;
+    padding-right: 10px;
   }
 }
 
@@ -51,12 +95,14 @@
   height: 100%;
   background: linear-gradient(
     90deg,
-    rgba(0, 0, 0, 0.7) 0%,
-    rgba(0, 0, 0, 0.45) 40%,
-    rgba(0, 0, 0, 0.2) 70%,
-    rgba(0, 0, 0, 0.05) 100%
+    rgba(0, 0, 0, 0.75) 0%,
+    rgba(0, 0, 0, 0.55) 35%,
+    rgba(0, 0, 0, 0.35) 60%,
+    rgba(0, 0, 0, 0.15) 85%,
+    rgba(0, 0, 0, 0.08) 100%
   );
   z-index: 2;
+  pointer-events: none;
 }
 
 .banner-content {

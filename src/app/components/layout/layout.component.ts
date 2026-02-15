@@ -18,7 +18,11 @@ import { RouterModule } from '@angular/router';
   styles: [`
     main {
       /* padding-top: 60px; REMOVED to allow banner to sit behind header */
-      min-height: calc(100vh - 160px); 
+      min-height: calc(100vh - 160px);
+      width: 100%;
+      overflow-x: hidden;
+      padding: 0;
+      margin: 0;
     }
   `]
 })

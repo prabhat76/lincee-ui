@@ -539,16 +539,37 @@ export class BannerManagementComponent implements OnInit {
     }
 
     this.uploading.set(true);
+    console.log('🖼️ Starting banner image upload...');
+    
     this.imageUploadService.uploadSingleImage(file, 'banners').subscribe({
       next: (response: any) => {
-        const result = response.body || response;
-        this.bannerForm.patchValue({ imageUrl: result.url });
+        console.log('✅ Banner upload response:', response);
+        
+        // Handle different response structures
+        let imageUrl: string;
+        if (typeof response === 'string') {
+          imageUrl = response;
+        } else if (response.url) {
+          imageUrl = response.url;
+        } else if (response.body?.url) {
+          imageUrl = response.body.url;
+        } else {
+          console.error('Unexpected response format:', response);
+          this.notificationService.error('Invalid upload response');
+          this.uploading.set(false);
+          return;
+        }
+        
+        this.bannerForm.patchValue({ imageUrl });
         this.notificationService.success('Image uploaded successfully');
         this.uploading.set(false);
       },
       error: (err) => {
-        console.error('Upload error:', err);
-        this.notificationService.error('Failed to upload image');
+        console.error('❌ Banner upload error:', err);
+        console.error('Error details:', JSON.stringify(err, null, 2));
+        
+        const errorMsg = err.error?.message || err.message || 'Failed to upload image';
+        this.notificationService.error(errorMsg);
         this.uploading.set(false);
       }
     });

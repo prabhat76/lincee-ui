@@ -27,20 +27,3 @@
   </div>
 </section>
 
-<!-- Fallback when no banner -->
-<section class="banner" @fadeIn *ngIf="!loading() && !banner()">
-  <img src="assets/image.png" alt="Banner" class="banner-image" loading="lazy">
-  <div class="banner-content" @slideInUp>
-    <span class="banner-kicker">New Season Drop</span>
-  </div>
-  
-  <div class="banner-bottom-controls">
-    <button class="scroll-indicator" (click)="scrollToSecondaryBanner()" aria-label="Scroll down">
-      <svg width="24" height="32" viewBox="0 0 24 32" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M4 6 L12 14 L20 6" />
-        <path d="M4 14 L12 22 L20 14" />
-        <path d="M4 22 L12 30 L20 22" />
-      </svg>
-    </button>
-  </div>
-</section>

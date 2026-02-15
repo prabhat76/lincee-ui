@@ -62,14 +62,8 @@ export class ImageUploadService {
     console.log('📁 Folder:', folder);
     console.log('📄 File:', file.name, `(${(file.size / 1024).toFixed(2)} KB)`);
 
-    return this.http.post<UploadResponse>(
-      `${this.API_URL}/api/v1/images/upload`,
-      formData,
-      {
-        reportProgress: true,
-        responseType: 'json'
-      }
-    );
+    // Use apiService.post which includes auth headers and proper base URL
+    return this.apiService.post<any>('images/upload', formData);
   }
 
   /**

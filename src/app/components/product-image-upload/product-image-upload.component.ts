@@ -509,12 +509,26 @@ export class ProductImageUploadComponent {
     // Upload to 'products' folder
     this.imageUploadService.uploadSingleImage(file, 'products').subscribe({
       next: (response: any) => {
-        const result = response.body || response;
-        console.log('✅ Image upload response:', result);
+        console.log('✅ Image upload response:', response);
+        
+        // Handle different response structures
+        let imageUrl: string;
+        if (typeof response === 'string') {
+          imageUrl = response;
+        } else if (response.url) {
+          imageUrl = response.url;
+        } else if (response.body?.url) {
+          imageUrl = response.body.url;
+        } else {
+          console.error('Unexpected response format:', response);
+          this.notificationService.error('Invalid upload response');
+          this.uploadingView.set(null);
+          return;
+        }
         
         const newImage: ProductImage = {
           view: this.selectedView,
-          url: result.url,
+          url: imageUrl,
           isPrimary: this.uploadedImages().length === 0
         };
 
@@ -528,7 +542,9 @@ export class ProductImageUploadComponent {
         console.error('❌ Upload error:', err);
         console.error('Error status:', err.status);
         console.error('Error body:', err.error);
-        this.notificationService.error(err.error?.message || 'Failed to upload image');
+        
+        const errorMsg = err.error?.message || err.message || 'Failed to upload image';
+        this.notificationService.error(errorMsg);
         this.uploadingView.set(null);
       }
     });
