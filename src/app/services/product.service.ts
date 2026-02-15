@@ -3,12 +3,20 @@ import { ApiService } from '../core/api.service';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map, tap, catchError, of, throwError } from 'rxjs';
 
+export interface ProductImage {
+  view: string; // 'front', 'back', 'side', 'detail', 'lifestyle'
+  url: string;
+  altText?: string;
+  isPrimary?: boolean;
+}
+
 export interface Product {
   id: number;
   name: string;
   description: string;
   price: number;
   images: string[];
+  productImages?: ProductImage[]; // Multiple views with metadata
   category?: string;
   imageUrls?: string[];
 }

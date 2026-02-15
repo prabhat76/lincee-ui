@@ -300,10 +300,20 @@
   }
 }
 
-@media (max-width: 900px) {
-  .table-header,
-  .table-row {
-    grid-template-columns: 2fr 1fr;
-    row-gap: 8px;
+.image-upload-section {
+  margin: 20px 0;
+  padding: 16px;
+  background: rgba(var(--color-primary-rgb), 0.05);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+  border-radius: 8px;
+
+  button {
+    margin-bottom: 16px;
+  }
+
+  app-product-image-upload {
+    display: block;
+    margin-top: 12px;
   }
 }
+

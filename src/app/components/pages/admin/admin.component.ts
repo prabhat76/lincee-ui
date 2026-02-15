@@ -2,15 +2,16 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { ProductService, Product } from '../../../services/product.service';
+import { ProductService, Product, ProductImage } from '../../../services/product.service';
 import { OrderService, Order } from '../../../services/order.service';
 import { AuthService } from '../../../services/auth.service';
 import { NotificationService } from '../../../services/notification.service';
+import { ProductImageUploadComponent } from '../../product-image-upload/product-image-upload.component';
 
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, ProductImageUploadComponent],
   templateUrl: './admin.component.html',
   styleUrls: ['./admin.component.scss']
 })
@@ -30,6 +31,8 @@ export class AdminComponent implements OnInit {
   loadingShopItems = signal(false);
   error = signal<string | null>(null);
   showAllProducts = signal(false);
+  selectedProductImages = signal<ProductImage[]>([]);
+  showImageUpload = signal(false);
 
   statusFilter = signal('PENDING');
   statusOptions = ['PENDING', 'CONFIRMED', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
@@ -117,19 +120,31 @@ export class AdminComponent implements OnInit {
     if (this.productForm.invalid) return;
 
     const { id, name, price, description, category, imageUrl } = this.productForm.value;
+    
+    // Build image URLs from uploaded images
+    const imageUrls: string[] = [];
+    const uploadedImages = this.selectedProductImages();
+    
+    if (uploadedImages.length > 0) {
+      imageUrls.push(...uploadedImages.map(img => img.url));
+    } else if (imageUrl) {
+      imageUrls.push(imageUrl);
+    }
+
     const payload = {
       name: name || '',
       price: Number(price || 0),
       description: description || '',
       category: category || 'Other',
-      imageUrls: imageUrl ? [imageUrl] : []
+      imageUrls: imageUrls.length > 0 ? imageUrls : [],
+      productImages: uploadedImages.length > 0 ? uploadedImages : undefined
     };
 
     if (id) {
       this.productService.updateProduct(id, payload).subscribe({
         next: () => {
           this.notificationService.success(`Product "${name}" updated successfully!`);
-          this.productForm.reset({ id: null, name: '', price: 0, description: '', category: '', imageUrl: '' });
+          this.resetProductForm();
           this.loadProducts();
         },
         error: (err) => {
@@ -141,7 +156,7 @@ export class AdminComponent implements OnInit {
       this.productService.createProduct(payload).subscribe({
         next: () => {
           this.notificationService.success(`Product "${name}" created successfully!`);
-          this.productForm.reset({ id: null, name: '', price: 0, description: '', category: '', imageUrl: '' });
+          this.resetProductForm();
           this.loadProducts();
         },
         error: (err) => {
@@ -150,6 +165,16 @@ export class AdminComponent implements OnInit {
         }
       });
     }
+  }
+
+  private resetProductForm() {
+    this.productForm.reset({ id: null, name: '', price: 0, description: '', category: '', imageUrl: '' });
+    this.selectedProductImages.set([]);
+    this.showImageUpload.set(false);
+  }
+
+  onReset(): void {
+    this.resetProductForm();
   }
 
   editProduct(product: Product) {
@@ -161,6 +186,12 @@ export class AdminComponent implements OnInit {
       category: product.category || '',
       imageUrl: product.images?.[0] || ''
     });
+    this.selectedProductImages.set(product.productImages || []);
+    this.showImageUpload.set(true);
+  }
+
+  onImagesSelected(images: ProductImage[]): void {
+    this.selectedProductImages.set(images);
   }
 
   deleteProduct(productId: number) {

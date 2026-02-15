@@ -46,12 +46,24 @@
         </div>
         <div class="form-row">
           <input formControlName="category" placeholder="Category" />
-          <input formControlName="imageUrl" placeholder="Image URL" />
+          <input formControlName="imageUrl" placeholder="Image URL (or use upload below)" />
         </div>
         <textarea formControlName="description" rows="3" placeholder="Description"></textarea>
+
+        <!-- Image Upload Component -->
+        <div class="image-upload-section">
+          <button type="button" class="btn btn-secondary" (click)="showImageUpload.set(!showImageUpload())">
+            {{ showImageUpload() ? 'Hide Image Upload' : 'Show Image Upload' }}
+          </button>
+          <app-product-image-upload 
+            *ngIf="showImageUpload()"
+            (imagesSelected)="onImagesSelected($event)">
+          </app-product-image-upload>
+        </div>
+
         <div class="form-actions">
           <button class="btn btn-primary" type="submit">Save Product</button>
-          <button class="btn btn-secondary" type="button" (click)="productForm.reset({ id: null, name: '', price: 0, description: '', category: '', imageUrl: '' })">
+          <button class="btn btn-secondary" type="button" (click)="onReset()">
             Clear
           </button>
         </div>
