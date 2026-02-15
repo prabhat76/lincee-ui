@@ -1,4 +1,31 @@
-<section class="secondary-banner" id="secondary-banner" @fadeIn>
+<section class="secondary-banner" id="secondary-banner" @fadeIn *ngIf="!loading() && banner()">
+  <img [src]="banner()!.imageUrl" [alt]="banner()!.title" class="banner-image" loading="lazy">
+  <div class="banner-content" @slideInUp>
+    <span class="eyebrow">{{ banner()!.title }}</span>
+    <h2 *ngIf="banner()!.subtitle">{{ banner()!.subtitle }}</h2>
+    <div class="scrolling-text" aria-live="polite" *ngIf="banner()!.subtitle">
+      <div class="scrolling-track">
+        <span class="scrolling-item">{{ banner()!.subtitle }}</span>
+        <span class="scrolling-item">{{ banner()!.subtitle }}</span>
+        <span class="scrolling-item">{{ banner()!.subtitle }}</span>
+        <span class="scrolling-item">{{ banner()!.subtitle }}</span>
+      </div>
+    </div>
+    <div class="banner-actions" *ngIf="banner()!.buttonText && banner()!.link">
+      <a [routerLink]="banner()!.link" class="btn btn-secondary">{{ banner()!.buttonText }}</a>
+    </div>
+  </div>
+</section>
+
+<!-- Loading state -->
+<section class="secondary-banner" id="secondary-banner" *ngIf="loading()">
+  <div class="banner-loading">
+    <p>Loading banner...</p>
+  </div>
+</section>
+
+<!-- Fallback when no banner -->
+<section class="secondary-banner" id="secondary-banner" @fadeIn *ngIf="!loading() && !banner()">
   <img src="assets/image copy 2.png" alt="A model wearing a hoodie" class="banner-image" loading="lazy">
   <div class="banner-content" @slideInUp>
     <span class="eyebrow">Seasonal Edit</span>

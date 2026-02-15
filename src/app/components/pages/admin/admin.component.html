@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="admin-header">
       <h1>Admin Console</h1>
-      <p>Manage products and update orders.</p>
+      <p>Manage your e-commerce platform</p>
     </div>
 
     <!-- Error Alert -->
@@ -12,81 +12,149 @@
       <button (click)="error.set(null)" class="close-btn">✕</button>
     </div>
 
-    <!-- Shop Items Section -->
-    <section class="admin-section">
-      <div class="section-header">
-        <h2>Shop Items</h2>
-      </div>
+    <!-- Tab Navigation -->
+    <div class="admin-tabs">
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab() === 'shop'"
+        (click)="setActiveTab('shop')"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+        <span>Shop Overview</span>
+      </button>
 
-      <div class="table" *ngIf="!loadingShopItems()">
-        <div class="table-header">
-          <span>ID</span>
-          <span>Name</span>
-          <span>Price</span>
-          <span>Category</span>
-          <span>Stock Status</span>
-        </div>
-        <div class="table-row" *ngFor="let item of shopItems()">
-          <span>#{{ item.id }}</span>
-          <span>{{ item.name }}</span>
-          <span>{{ item.price | currency }}</span>
-          <span>{{ item.category }}</span>
-          <span class="stock-status">In Stock</span>
-        </div>
-        <div class="empty-state" *ngIf="shopItems().length === 0">
-          <p>No items in shop. Add products to see them here.</p>
-        </div>
-      </div>
-      <div class="loading" *ngIf="loadingShopItems()">Loading shop items...</div>
-    </section>
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab() === 'banners'"
+        (click)="setActiveTab('banners')"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <circle cx="8.5" cy="8.5" r="1.5"></circle>
+          <polyline points="21 15 16 10 5 21"></polyline>
+        </svg>
+        <span>Banners</span>
+      </button>
 
-    <!-- Products Section -->
-    <section class="admin-section">
-      <div class="section-header">
-        <h2>Product Management</h2>
-      </div>
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab() === 'products'"
+        (click)="setActiveTab('products')"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+        </svg>
+        <span>Products</span>
+      </button>
 
-      <!-- Excel Import Toggle -->
-      <div class="excel-import-toggle">
-        <button 
-          type="button" 
-          class="btn btn-secondary"
-          (click)="toggleExcelImport()"
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab() === 'orders'"
+        (click)="setActiveTab('orders')"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <path d="M16 10a4 4 0 0 1-8 0"></path>
+        </svg>
+        <span>Orders</span>
+      </button>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="admin-content">
+      <!-- Shop Items Tab -->
+      <section class="admin-section" *ngIf="activeTab() === 'shop'">
+        <div class="section-header">
+          <h2>Shop Overview</h2>
+          <p>View all published items in your store</p>
+        </div>
+
+        <div class="table" *ngIf="!loadingShopItems()">
+          <div class="table-header">
+            <span>ID</span>
+            <span>Name</span>
+            <span>Price</span>
+            <span>Category</span>
+            <span>Stock Status</span>
+          </div>
+          <div class="table-row" *ngFor="let item of shopItems()">
+            <span>#{{ item.id }}</span>
+            <span>{{ item.name }}</span>
+            <span>{{ item.price | currency }}</span>
+            <span>{{ item.category }}</span>
+            <span class="stock-status">In Stock</span>
+          </div>
+          <div class="empty-state" *ngIf="shopItems().length === 0">
+            <p>No items in shop. Add products to see them here.</p>
+          </div>
+        </div>
+        <div class="loading" *ngIf="loadingShopItems()">Loading shop items...</div>
+      </section>
+
+      <!-- Banner Management Tab -->
+      <section class="admin-section" *ngIf="activeTab() === 'banners'">
+        <div class="section-header">
+          <h2>Banner Management</h2>
+          <p>Manage hero banners, secondary banners, and promotional content</p>
+        </div>
+        <app-banner-management></app-banner-management>
+      </section>
+
+      <!-- Products Tab -->
+      <section class="admin-section" *ngIf="activeTab() === 'products'">
+        <div class="section-header">
+          <h2>Product Management</h2>
+          <p>Add, edit, or bulk import products</p>
+        </div>
+
+        <!-- Excel Import Toggle -->
+        <div class="excel-import-toggle">
+          <button 
+            type="button" 
+            class="btn btn-secondary"
+            (click)="toggleExcelImport()"
+          >
+            {{ showExcelImport() ? '📊 Hide Bulk Import' : '📊 Show Bulk Import' }}
+          </button>
+        </div>
+
+        <!-- Excel Import Component -->
+        <app-excel-import 
+          *ngIf="showExcelImport()"
+          (productImported)="onProductImported($event)"
         >
-          {{ showExcelImport() ? '📊 Hide Bulk Import' : '📊 Show Bulk Import' }}
-        </button>
-      </div>
+        </app-excel-import>
 
-      <!-- Excel Import Component -->
-      <app-excel-import 
-        *ngIf="showExcelImport()"
-        (productImported)="onProductImported($event)"
-      >
-      </app-excel-import>
+        <!-- Product Form Component -->
+        <app-product-form 
+          [editingProduct]="editingProduct()"
+          (productSubmitted)="onProductSubmitted($event)"
+          (formReset)="onFormReset()"
+        >
+        </app-product-form>
 
-      <!-- Product Form Component -->
-      <app-product-form 
-        [editingProduct]="editingProduct()"
-        (productSubmitted)="onProductSubmitted($event)"
-        (formReset)="onFormReset()"
-      >
-      </app-product-form>
+        <!-- Product List Component -->
+        <app-product-list 
+          [products]="products()"
+          [isLoading]="loadingProducts()"
+          (editProduct)="onEditProduct($event)"
+          (productDeleted)="onProductDeleted($event)"
+        >
+        </app-product-list>
+      </section>
 
-      <!-- Product List Component -->
-      <app-product-list 
-        [products]="products()"
-        [isLoading]="loadingProducts()"
-        (editProduct)="onEditProduct($event)"
-        (productDeleted)="onProductDeleted($event)"
-      >
-      </app-product-list>
-    </section>
-
-    <!-- Orders Section -->
-    <app-orders-section
-      [orders]="orders()"
-      [isLoading]="loadingOrders()"
-    >
-    </app-orders-section>
+      <!-- Orders Tab -->
+      <section class="admin-section" *ngIf="activeTab() === 'orders'">
+        <app-orders-section
+          [orders]="orders()"
+          [isLoading]="loadingOrders()"
+        >
+        </app-orders-section>
+      </section>
+    </div>
   </div>
 </div>

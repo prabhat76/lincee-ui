@@ -9,6 +9,7 @@ import { ProductFormComponent } from '../../product-form/product-form.component'
 import { ProductListComponent } from '../../product-list/product-list.component';
 import { OrdersSectionComponent } from '../../orders-section/orders-section.component';
 import { ExcelImportComponent } from '../../excel-import/excel-import.component';
+import { BannerManagementComponent } from '../../banner-management/banner-management.component';
 import { ExcelImportResponse } from '../../../services/excel-import.service';
 
 @Component({
@@ -20,7 +21,8 @@ import { ExcelImportResponse } from '../../../services/excel-import.service';
     ProductFormComponent,
     ProductListComponent,
     OrdersSectionComponent,
-    ExcelImportComponent
+    ExcelImportComponent,
+    BannerManagementComponent
   ],
   templateUrl: './admin.component.html',
   styleUrls: ['./admin.component.scss']
@@ -49,6 +51,7 @@ export class AdminComponent implements OnInit {
   // UI State
   error = signal<string | null>(null);
   showExcelImport = signal(false);
+  activeTab = signal<'shop' | 'banners' | 'products' | 'orders'>('shop');
 
   ngOnInit() {
     // Check admin authorization
@@ -182,5 +185,24 @@ export class AdminComponent implements OnInit {
    */
   toggleExcelImport(): void {
     this.showExcelImport.set(!this.showExcelImport());
+  }
+
+  /**
+   * Set active tab
+   */
+  setActiveTab(tab: 'shop' | 'banners' | 'products' | 'orders'): void {
+    this.activeTab.set(tab);
+    // Load data for the selected tab if needed
+    switch(tab) {
+      case 'shop':
+        if (this.shopItems().length === 0) this.loadShopItems();
+        break;
+      case 'products':
+        if (this.products().length === 0) this.loadProducts();
+        break;
+      case 'orders':
+        if (this.orders().length === 0) this.loadOrders();
+        break;
+    }
   }
 }

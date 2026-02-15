@@ -1,12 +1,40 @@
-<section class="banner" @fadeIn>
-  <img src="assets/image.png" alt="Banner" class="banner-image" loading="lazy">
+<section class="banner" @fadeIn *ngIf="!loading() && banner()">
+  <img [src]="banner()!.imageUrl" [alt]="banner()!.title" class="banner-image" loading="lazy">
   <div class="banner-content" @slideInUp>
-    <span class="banner-kicker">New Season Drop</span>
-    
+    <span class="banner-kicker">{{ banner()!.title }}</span>
+    <h1 class="banner-title" *ngIf="banner()!.subtitle">{{ banner()!.subtitle }}</h1>
+    <div class="banner-actions" *ngIf="banner()!.buttonText && banner()!.link">
+      <a [routerLink]="banner()!.link" class="btn btn-primary">{{ banner()!.buttonText }}</a>
+    </div>
   </div>
   
   <div class="banner-bottom-controls">
      <!-- Triple Chevron Array (Pointing Down) -->
+    <button class="scroll-indicator" (click)="scrollToSecondaryBanner()" aria-label="Scroll down">
+      <svg width="24" height="32" viewBox="0 0 24 32" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M4 6 L12 14 L20 6" />
+        <path d="M4 14 L12 22 L20 14" />
+        <path d="M4 22 L12 30 L20 22" />
+      </svg>
+    </button>
+  </div>
+</section>
+
+<!-- Loading state -->
+<section class="banner" *ngIf="loading()">
+  <div class="banner-loading">
+    <p>Loading banner...</p>
+  </div>
+</section>
+
+<!-- Fallback when no banner -->
+<section class="banner" @fadeIn *ngIf="!loading() && !banner()">
+  <img src="assets/image.png" alt="Banner" class="banner-image" loading="lazy">
+  <div class="banner-content" @slideInUp>
+    <span class="banner-kicker">New Season Drop</span>
+  </div>
+  
+  <div class="banner-bottom-controls">
     <button class="scroll-indicator" (click)="scrollToSecondaryBanner()" aria-label="Scroll down">
       <svg width="24" height="32" viewBox="0 0 24 32" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M4 6 L12 14 L20 6" />
