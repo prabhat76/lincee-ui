@@ -6,12 +6,12 @@ import { ProductService, Product, ProductImage } from '../../../services/product
 import { OrderService, Order } from '../../../services/order.service';
 import { AuthService } from '../../../services/auth.service';
 import { NotificationService } from '../../../services/notification.service';
-import { ProductImageUploadComponent } from '../../product-image-upload/product-image-upload.component';
-
+import { ProductImageUploadComponent } from '../../product-image-upload/product-image-upload.component';import { ExcelImportComponent } from '../../excel-import/excel-import.component';
+import { ExcelImportResponse } from '../../../services/excel-import.service';
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, ProductImageUploadComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, ProductImageUploadComponent, ExcelImportComponent],
   templateUrl: './admin.component.html',
   styleUrls: ['./admin.component.scss']
 })
@@ -33,6 +33,7 @@ export class AdminComponent implements OnInit {
   showAllProducts = signal(false);
   selectedProductImages = signal<ProductImage[]>([]);
   showImageUpload = signal(false);
+  showExcelImport = signal(false);
 
   statusFilter = signal('PENDING');
   statusOptions = ['PENDING', 'CONFIRMED', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
@@ -192,6 +193,13 @@ export class AdminComponent implements OnInit {
 
   onImagesSelected(images: ProductImage[]): void {
     this.selectedProductImages.set(images);
+  }
+
+  onProductImported(result: ExcelImportResponse): void {
+    if (result.success) {
+      // Reload products to show newly imported ones
+      setTimeout(() => this.loadProducts(), 1500);
+    }
   }
 
   deleteProduct(productId: number) {

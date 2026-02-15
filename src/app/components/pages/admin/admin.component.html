@@ -39,6 +39,18 @@
         <h2>Products</h2>
       </div>
 
+      <!-- Excel Import Section -->
+      <div class="excel-import-toggle">
+        <button type="button" class="btn btn-secondary" (click)="showExcelImport.set(!showExcelImport())">
+          {{ showExcelImport() ? '📊 Hide Bulk Import' : '📊 Show Bulk Import' }}
+        </button>
+      </div>
+
+      <app-excel-import 
+        *ngIf="showExcelImport()"
+        (productImported)="onProductImported($event)">
+      </app-excel-import>
+
       <form [formGroup]="productForm" (ngSubmit)="submitProduct()" class="product-form">
         <div class="form-row">
           <input formControlName="name" placeholder="Product name" />
@@ -63,7 +75,7 @@
 
         <div class="form-actions">
           <button class="btn btn-primary" type="submit">Save Product</button>
-          <button class="btn btn-secondary" type="button" (click)="onReset()">
+          <button class="btn btn-secondary" type="button" (click)="showImageUpload.set(false); selectedProductImages.set([]); productForm.reset({ id: null, name: '', price: 0, description: '', category: '', imageUrl: '' })">
             Clear
           </button>
         </div>
