@@ -116,10 +116,27 @@ export class ProductService {
   }
 
   private transformProduct(p: any): Product {
+    const productImages = Array.isArray(p.productImages)
+      ? p.productImages.map((image: any) => {
+          const rawUrl = image?.url || image?.imageUrl || image?.path;
+          const normalizedUrl = typeof rawUrl === 'string'
+            ? (rawUrl.startsWith('http') ? rawUrl : `${this.BASE_URL}${rawUrl}`)
+            : 'assets/image.png';
+
+          return {
+            view: image?.view || image?.type || 'image',
+            url: normalizedUrl,
+            altText: image?.altText,
+            isPrimary: image?.isPrimary
+          } as ProductImage;
+        })
+      : undefined;
+
     return {
       ...p,
       name: p.name || 'Unknown Product',
       category: (typeof p.category === 'object' && p.category !== null) ? p.category.name : (p.category || 'Other'),
+      productImages,
       images: (p.imageUrls && p.imageUrls.length > 0)
         ? p.imageUrls.map((url: string) => url.startsWith('http') ? url : `${this.BASE_URL}${url}`)
         : ['assets/image.png']

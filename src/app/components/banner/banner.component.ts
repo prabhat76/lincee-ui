@@ -1,13 +1,12 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import { fadeInAnimation, listAnimation, slideInUpAnimation } from '../../core/animations';
 import { BannerService, Banner } from '../../services/banner.service';
 
 @Component({
   selector: 'app-banner',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   templateUrl: './banner.component.html',
   styleUrl: './banner.component.scss',
   animations: [fadeInAnimation, slideInUpAnimation, listAnimation]

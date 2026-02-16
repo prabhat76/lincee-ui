@@ -7,8 +7,20 @@
 <div class="product-details-page" *ngIf="!loading() && product() as p">
     <div class="container">
         <div class="product-grid">
-            <div class="product-gallery">
-                <img [src]="p.images[0] || 'assets/image.png'" [alt]="p.name" (error)="handleImageError($event)">
+            <div class="product-gallery" [class.has-hover-image]="getHoverImage(p)">
+                <img
+                    class="product-gallery__primary"
+                    [src]="getPrimaryImage(p)"
+                    [alt]="p.name"
+                    (error)="handleImageError($event)"
+                >
+                <img
+                    *ngIf="getHoverImage(p) as hoverImage"
+                    class="product-gallery__hover"
+                    [src]="hoverImage"
+                    [alt]="p.name + ' lifestyle'"
+                    (error)="handleImageError($event)"
+                >
             </div>
             
             <div class="product-info">
@@ -44,8 +56,20 @@
 
                 <div class="product-actions">
                     <button class="btn-add-cart" (click)="addToCart()" [disabled]="addingToCart()">
-                        {{ addingToCart() ? 'ADDING...' : 'ADD TO CART' }}
+                        <span *ngIf="!addingToCart()">{{ getQuantity() > 0 ? 'ADD ANOTHER' : 'ADD TO CART' }}</span>
+                        <span *ngIf="addingToCart()">ADDING...</span>
                     </button>
+
+                    <button class="btn-buy-now" (click)="buyNow()" [disabled]="addingToCart()">
+                        <span *ngIf="!addingToCart()">BUY NOW</span>
+                        <span *ngIf="addingToCart()">PROCESSING...</span>
+                    </button>
+
+                    <div class="quantity-controls" *ngIf="getQuantity() > 0">
+                        <button class="btn-qty" (click)="decreaseQuantity()" [disabled]="addingToCart()">−</button>
+                        <span class="qty-display">In cart: {{ getQuantity() }}</span>
+                        <button class="btn-qty" (click)="increaseQuantity()" [disabled]="addingToCart()">+</button>
+                    </div>
                     <p class="message" *ngIf="message()" [class.error]="message().includes('Failed')">
                         {{ message() }}
                     </p>

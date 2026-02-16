@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ProductService, Product } from '../../../services/product.service';
 import { CartService } from '../../../services/cart.service';
 
@@ -15,6 +15,7 @@ export class ProductDetailsComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private productService = inject(ProductService);
   private cartService = inject(CartService);
+  private router = inject(Router);
 
   product = signal<Product | null>(null);
   loading = signal<boolean>(true);
@@ -59,6 +60,7 @@ export class ProductDetailsComponent implements OnInit {
   }
 
   addToCart() {
+    if (this.addingToCart()) return;
     const p = this.product();
     if (!p) return;
 
@@ -77,7 +79,78 @@ export class ProductDetailsComponent implements OnInit {
     });
   }
 
+  buyNow() {
+    if (this.addingToCart()) return;
+    const p = this.product();
+    if (!p) return;
+
+    this.addingToCart.set(true);
+    this.cartService.addToCart(p.id, 1, this.selectedSize(), this.selectedColor()).subscribe({
+      next: () => {
+        this.addingToCart.set(false);
+        this.router.navigate(['/checkout']);
+      },
+      error: () => {
+        this.addingToCart.set(false);
+        this.message.set('Failed to add to cart.');
+      }
+    });
+  }
+
+  increaseQuantity() {
+    if (this.addingToCart()) return;
+    const p = this.product();
+    if (!p) return;
+    this.addingToCart.set(true);
+    this.cartService.addToCart(p.id, 1, this.selectedSize(), this.selectedColor()).subscribe({
+      next: () => this.addingToCart.set(false),
+      error: () => this.addingToCart.set(false)
+    });
+  }
+
+  decreaseQuantity() {
+    if (this.addingToCart()) return;
+    const p = this.product();
+    if (!p) return;
+    this.addingToCart.set(true);
+    this.cartService.updateQuantity(p.id, -1);
+    setTimeout(() => this.addingToCart.set(false), 400);
+  }
+
+  getQuantity(): number {
+    const p = this.product();
+    if (!p) return 0;
+    const cart = this.cartService.cart();
+    return cart.items
+      .filter(item => item.productId === p.id)
+      .reduce((acc, item) => acc + item.quantity, 0);
+  }
+
   handleImageError(event: any) {
     event.target.src = 'assets/image.png';
+  }
+
+  getPrimaryImage(product: Product): string {
+    return this.getViewImage(product, ['front', 'back'])
+      || product.images?.[0]
+      || 'assets/image.png';
+  }
+
+  getHoverImage(product: Product): string | null {
+    return this.getViewImage(product, ['lifestyle'])
+      || (product.images && product.images.length > 1 ? product.images[1] : null);
+  }
+
+  private getViewImage(product: Product, views: string[]): string | null {
+    if (!product.productImages || product.productImages.length === 0) {
+      return null;
+    }
+
+    const viewSet = views.map(view => view.toLowerCase());
+    const match = product.productImages.find(image =>
+      image.view && viewSet.includes(image.view.toLowerCase())
+    );
+
+    return match?.url || null;
   }
 }

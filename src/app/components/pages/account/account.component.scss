@@ -1,0 +1,99 @@
+.account-page {
+  color: var(--color-text);
+}
+
+.section-title {
+  color: var(--color-text-heading);
+  text-align: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+.account-details, .addresses, .address-form {
+  background-color: var(--color-surface);
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  margin-bottom: var(--spacing-lg);
+  border: 1px solid var(--color-border);
+}
+
+h2, h3 {
+  color: var(--color-text-heading);
+  margin-bottom: var(--spacing-md);
+}
+
+.address-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.address-card {
+  padding: var(--spacing-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-sm);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  p {
+    margin: 0 0 var(--spacing-xs) 0;
+    color: var(--color-secondary);
+  }
+
+  .actions {
+    margin-top: var(--spacing-md);
+    display: flex;
+    gap: var(--spacing-sm);
+  }
+}
+
+.form-group {
+  margin-bottom: var(--spacing-md);
+
+  input {
+    width: 100%;
+    padding: var(--spacing-sm);
+    background-color: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-sm);
+    color: var(--color-text);
+
+    &:focus {
+      outline: none;
+      border-color: var(--color-primary);
+    }
+  }
+}
+
+.form-actions {
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+// Basic button styles - assuming you have these globally
+.btn-primary, .btn-secondary, .btn-danger {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  text-transform: uppercase;
+  font-weight: var(--font-weight-medium);
+  border: 1px solid;
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  color: var(--color-background);
+  border-color: var(--color-primary);
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: var(--color-primary);
+  border-color: var(--color-border);
+}
+
+.btn-danger {
+  background-color: #d45454;
+  color: white;
+  border-color: #d45454;
+}

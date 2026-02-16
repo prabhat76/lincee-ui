@@ -18,9 +18,23 @@
       <h3 class="category-title">{{ group.name }}</h3>
       
       <div class="products-grid">
-        <div class="product-card" *ngFor="let product of group.products | slice:0:group.visibleCount">
+        <div class="product-card" *ngFor="let product of group.products | slice:0:group.visibleCount" [class.has-hover-image]="getHoverImage(product)">
           <div class="product-image" [routerLink]="['/products', product.id]" style="cursor: pointer;">
-            <img [src]="product.images[0]" [alt]="product.name" loading="lazy" (error)="handleImageError($event)" />
+            <img
+              class="product-image__primary"
+              [src]="getPrimaryImage(product)"
+              [alt]="product.name"
+              loading="lazy"
+              (error)="handleImageError($event)"
+            />
+            <img
+              *ngIf="getHoverImage(product) as hoverImage"
+              class="product-image__hover"
+              [src]="hoverImage"
+              [alt]="product.name + ' lifestyle'"
+              loading="lazy"
+              (error)="handleImageError($event)"
+            />
           </div>
           <div class="product-info">
             <h3 class="product-name" [routerLink]="['/products', product.id]" style="cursor: pointer;">{{ product.name }}</h3>

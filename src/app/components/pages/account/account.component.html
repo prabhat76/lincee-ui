@@ -1,0 +1,52 @@
+<div class="account-page container section">
+  <h1 class="section-title">My Account</h1>
+
+  <div *ngIf="user" class="account-details">
+    <h2>Welcome, {{ user.firstName }} {{ user.lastName }}</h2>
+    <p><strong>Email:</strong> {{ user.email }}</p>
+  </div>
+
+  <div class="addresses" [@listAnimation]="user?.addresses?.length">
+    <h3>Your Addresses</h3>
+    <div class="address-list">
+      <div *ngFor="let address of user?.addresses" class="address-card">
+        <p>{{ address.addressLine1 }}, {{ address.addressLine2 }}</p>
+        <p>{{ address.city }}, {{ address.state }} {{ address.zipCode }}</p>
+        <p>{{ address.country }}</p>
+        <p>Phone: {{ address.phoneNumber }}</p>
+        <div class="actions">
+          <button (click)="editAddress(address)" class="btn-secondary">Edit</button>
+          <button (click)="deleteAddress(address.id)" class="btn-danger">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="address-form">
+    <h3>{{ isEditing ? 'Edit Address' : 'Add a New Address' }}</h3>
+    <form [formGroup]="addressForm" (ngSubmit)="saveAddress()">
+      <div class="form-group">
+        <input formControlName="addressLine1" placeholder="Address Line 1">
+      </div>
+      <div class="form-group">
+        <input formControlName="addressLine2" placeholder="Address Line 2 (Optional)">
+      </div>
+      <div class="form-group">
+        <input formControlName="city" placeholder="City">
+      </div>
+      <div class="form-group">
+        <input formControlName="state" placeholder="State">
+      </div>
+      <div class="form-group">
+        <input formControlName="zipCode" placeholder="Zip Code">
+      </div>
+       <div class="form-group">
+        <input formControlName="phoneNumber" placeholder="Phone Number">
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn-primary" [disabled]="addressForm.invalid">Save Address</button>
+        <button type="button" (click)="resetForm()" class="btn-secondary" *ngIf="isEditing">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>

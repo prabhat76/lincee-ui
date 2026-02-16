@@ -157,4 +157,28 @@ export class ProductsComponent implements OnInit {
   handleImageError(event: any) {
     event.target.src = 'assets/image.png';
   }
+
+  getPrimaryImage(product: Product): string {
+    return this.getViewImage(product, ['front', 'back'])
+      || product.images?.[0]
+      || 'assets/image.png';
+  }
+
+  getHoverImage(product: Product): string | null {
+    return this.getViewImage(product, ['lifestyle'])
+      || (product.images && product.images.length > 1 ? product.images[1] : null);
+  }
+
+  private getViewImage(product: Product, views: string[]): string | null {
+    if (!product.productImages || product.productImages.length === 0) {
+      return null;
+    }
+
+    const viewSet = views.map(view => view.toLowerCase());
+    const match = product.productImages.find(image =>
+      image.view && viewSet.includes(image.view.toLowerCase())
+    );
+
+    return match?.url || null;
+  }
 }

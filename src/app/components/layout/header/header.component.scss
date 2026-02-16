@@ -97,6 +97,8 @@
     height: 32px; // Default height
     width: auto;
     object-fit: contain;
+    background-color: transparent;
+    mix-blend-mode: multiply;
     transition: height var(--transition-duration-normal) ease;
 
     @media (max-width: 768px) {
