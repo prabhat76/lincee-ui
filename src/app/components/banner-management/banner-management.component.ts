@@ -24,10 +24,10 @@ import { ImageUploadService } from '../../services/image-upload.service';
         <form [formGroup]="bannerForm" (ngSubmit)="saveBanner()">
           <div class="form-grid">
             <div class="form-group">
-              <label>Title *</label>
+              <label>Title</label>
               <input formControlName="title" placeholder="New Season Drop" />
               <span class="error" *ngIf="bannerForm.get('title')?.invalid && bannerForm.get('title')?.touched">
-                Title is required
+                Title must be valid
               </span>
             </div>
 
@@ -468,7 +468,7 @@ export class BannerManagementComponent implements OnInit {
   editingBanner = signal<Banner | null>(null);
 
   bannerForm = this.fb.group({
-    title: ['', Validators.required],
+    title: [''],
     subtitle: [''],
     imageUrl: ['', Validators.required],
     position: ['hero', Validators.required],

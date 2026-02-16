@@ -1,13 +1,6 @@
 <section class="banner" @fadeIn *ngIf="!loading() && banner()">
-  <img [src]="banner()!.imageUrl" [alt]="banner()!.title" class="banner-image" loading="lazy">
-  <div class="banner-content" @slideInUp>
-    <span class="banner-kicker">{{ banner()!.title }}</span>
-    <h1 class="banner-title" *ngIf="banner()!.subtitle">{{ banner()!.subtitle }}</h1>
-    <div class="banner-actions" *ngIf="banner()!.buttonText && banner()!.link">
-      <a [routerLink]="banner()!.link" class="btn btn-primary">{{ banner()!.buttonText }}</a>
-    </div>
-  </div>
-  
+  <img [src]="banner()!.imageUrl" [alt]="banner()!.title || 'Banner'" class="banner-image" loading="lazy">
+</section>
   <div class="banner-bottom-controls">
      <!-- Triple Chevron Array (Pointing Down) -->
     <button class="scroll-indicator" (click)="scrollToSecondaryBanner()" aria-label="Scroll down">
@@ -18,8 +11,6 @@
       </svg>
     </button>
   </div>
-</section>
-
 <!-- Loading state -->
 <section class="banner" *ngIf="loading()">
   <div class="banner-loading">

@@ -37,39 +37,39 @@
   }
 
   @media (max-width: 768px) {
-    min-height: clamp(460px, 84vh, 760px);
+    min-height: 70vh;
     margin-top: 76px;
-    padding-top: 50px;
-    padding-bottom: 90px;
-    padding-left: 20px;
-    padding-right: 20px;
+    padding-top: 0;
+    padding-bottom: 72px;
+    padding-left: 0;
+    padding-right: 0;
   }
 
   @media (max-width: 640px) {
-    min-height: clamp(420px, 80vh, 680px);
+    min-height: 60vh;
     margin-top: 76px;
-    padding-top: 45px;
-    padding-bottom: 80px;
-    padding-left: 16px;
-    padding-right: 16px;
+    padding-top: 0;
+    padding-bottom: 64px;
+    padding-left: 0;
+    padding-right: 0;
   }
 
   @media (max-width: 480px) {
-    min-height: clamp(380px, 75vh, 620px);
+    min-height: 55vh;
     margin-top: 76px;
-    padding-top: 40px;
-    padding-bottom: 70px;
-    padding-left: 12px;
-    padding-right: 12px;
+    padding-top: 0;
+    padding-bottom: 56px;
+    padding-left: 0;
+    padding-right: 0;
   }
 
   @media (max-width: 375px) {
-    min-height: clamp(340px, 70vh, 580px);
+    min-height: 50vh;
     margin-top: 76px;
-    padding-top: 35px;
-    padding-bottom: 60px;
-    padding-left: 10px;
-    padding-right: 10px;
+    padding-top: 0;
+    padding-bottom: 48px;
+    padding-left: 0;
+    padding-right: 0;
   }
 }
 
@@ -84,6 +84,18 @@
   z-index: 1;
   transform: scale(1.01);
   animation: slowZoom 20s ease-in-out infinite alternate;
+}
+
+@media (max-width: 768px) {
+  .banner-image {
+    object-position: 50% 30%;
+  }
+}
+
+@media (max-width: 480px) {
+  .banner-image {
+    object-position: 50% 40%;
+  }
 }
 
 .banner::before {
@@ -204,6 +216,22 @@
   display: flex;
   justify-content: center;
   width: auto;
+}
+
+@media (max-width: 768px) {
+  .banner-bottom-controls {
+    bottom: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .banner-bottom-controls {
+    bottom: 16px;
+  }
+  .scroll-indicator svg {
+    width: 20px;
+    height: 28px;
+  }
 }
 
 /* Scroll indicator styling */
