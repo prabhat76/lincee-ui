@@ -27,7 +27,7 @@ import { ImageUploadService } from '../../services/image-upload.service';
               <label>Title</label>
               <input formControlName="title" placeholder="New Season Drop" />
               <span class="error" *ngIf="bannerForm.get('title')?.invalid && bannerForm.get('title')?.touched">
-                Title must be valid
+                Title is required (min 2 characters)
               </span>
             </div>
 
@@ -468,7 +468,7 @@ export class BannerManagementComponent implements OnInit {
   editingBanner = signal<Banner | null>(null);
 
   bannerForm = this.fb.group({
-    title: [''],
+    title: ['', [Validators.required, Validators.minLength(2)]],
     subtitle: [''],
     imageUrl: ['', Validators.required],
     position: ['hero', Validators.required],
@@ -584,12 +584,16 @@ export class BannerManagementComponent implements OnInit {
   }
 
   saveBanner() {
-    if (this.bannerForm.invalid) return;
+    if (this.bannerForm.invalid) {
+      this.bannerForm.markAllAsTouched();
+      this.notificationService.error('Please complete required banner fields');
+      return;
+    }
 
     this.saving.set(true);
     const formValue = this.bannerForm.value;
     const bannerData: Partial<Banner> = {
-      title: formValue.title!,
+      title: formValue.title!.trim(),
       subtitle: formValue.subtitle || undefined,
       imageUrl: formValue.imageUrl!,
       position: formValue.position as any,
@@ -600,6 +604,8 @@ export class BannerManagementComponent implements OnInit {
       startDate: formValue.startDate ? new Date(formValue.startDate) : undefined,
       endDate: formValue.endDate ? new Date(formValue.endDate) : undefined
     };
+
+    console.log('📦 Banner save payload:', bannerData);
 
     const request = this.editingBanner()
       ? this.bannerService.updateBanner(this.editingBanner()!.id, bannerData)
@@ -614,7 +620,13 @@ export class BannerManagementComponent implements OnInit {
       },
       error: (err) => {
         console.error('Save error:', err);
-        this.notificationService.error('Failed to save banner');
+        const errorMsg =
+          err?.error?.message ||
+          err?.error?.error ||
+          (Array.isArray(err?.error?.errors) ? err.error.errors.join(', ') : undefined) ||
+          err?.message ||
+          'Failed to save banner';
+        this.notificationService.error(errorMsg);
         this.saving.set(false);
       }
     });
