@@ -544,16 +544,8 @@ export class BannerManagementComponent implements OnInit {
     this.imageUploadService.uploadSingleImage(file, 'banners').subscribe({
       next: (response: any) => {
         console.log('✅ Banner upload response:', response);
-        
-        // Handle different response structures
-        let imageUrl: string;
-        if (typeof response === 'string') {
-          imageUrl = response;
-        } else if (response.url) {
-          imageUrl = response.url;
-        } else if (response.body?.url) {
-          imageUrl = response.body.url;
-        } else {
+        const imageUrl = this.extractUploadedImageUrl(response);
+        if (!imageUrl) {
           console.error('Unexpected response format:', response);
           this.notificationService.error('Invalid upload response');
           this.uploading.set(false);
@@ -573,6 +565,22 @@ export class BannerManagementComponent implements OnInit {
         this.uploading.set(false);
       }
     });
+  }
+
+  private extractUploadedImageUrl(response: any): string | null {
+    if (!response) return null;
+    if (typeof response === 'string') return response;
+
+    const directUrl = response.imageUrl || response.url || response.path;
+    if (directUrl) return directUrl;
+
+    const bodyUrl = response.body?.imageUrl || response.body?.url || response.body?.path;
+    if (bodyUrl) return bodyUrl;
+
+    const dataUrl = response.data?.imageUrl || response.data?.url || response.data?.path;
+    if (dataUrl) return dataUrl;
+
+    return null;
   }
 
   saveBanner() {

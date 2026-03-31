@@ -44,6 +44,9 @@ const images = [
   }
 ];
 
+const isHeroOnly = process.argv.includes('--hero-only');
+const imagesToUpload = isHeroOnly ? images.filter((image) => image.type === 'hero') : images;
+
 /**
  * Make HTTPS POST request
  */
@@ -108,7 +111,8 @@ async function uploadImage(imagePath, fileName) {
   }
 
   const form = new FormData();
-  form.append('image', fs.createReadStream(filePath), fileName);
+  // Backend /images/upload expects multipart field name "file"
+  form.append('file', fs.createReadStream(filePath), fileName);
 
   try {
     const result = await makeRequest('POST', '/images/upload', {
@@ -147,7 +151,7 @@ async function createBanner(bannerData) {
  */
 async function uploadBanners() {
   try {
-    for (const image of images) {
+    for (const image of imagesToUpload) {
       // Upload image
       const imageUrl = await uploadImage(image.path, path.basename(image.path));
 

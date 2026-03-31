@@ -510,16 +510,9 @@ export class ProductImageUploadComponent {
     this.imageUploadService.uploadSingleImage(file, 'products').subscribe({
       next: (response: any) => {
         console.log('✅ Image upload response:', response);
-        
-        // Handle different response structures
-        let imageUrl: string;
-        if (typeof response === 'string') {
-          imageUrl = response;
-        } else if (response.url) {
-          imageUrl = response.url;
-        } else if (response.body?.url) {
-          imageUrl = response.body.url;
-        } else {
+
+        const imageUrl = this.extractUploadedImageUrl(response);
+        if (!imageUrl) {
           console.error('Unexpected response format:', response);
           this.notificationService.error('Invalid upload response');
           this.uploadingView.set(null);
@@ -548,6 +541,22 @@ export class ProductImageUploadComponent {
         this.uploadingView.set(null);
       }
     });
+  }
+
+  private extractUploadedImageUrl(response: any): string | null {
+    if (!response) return null;
+    if (typeof response === 'string') return response;
+
+    const directUrl = response.imageUrl || response.url || response.path;
+    if (directUrl) return directUrl;
+
+    const bodyUrl = response.body?.imageUrl || response.body?.url || response.body?.path;
+    if (bodyUrl) return bodyUrl;
+
+    const dataUrl = response.data?.imageUrl || response.data?.url || response.data?.path;
+    if (dataUrl) return dataUrl;
+
+    return null;
   }
 
   removeImage(view: string): void {
