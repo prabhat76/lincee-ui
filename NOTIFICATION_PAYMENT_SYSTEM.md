@@ -121,7 +121,7 @@ POST /payments/verify
 ## Real-time Notification Setup
 
 ### WebSocket Configuration
-- Base URL: `wss://linceecom-production.up.railway.app`
+- Base URL: `wss://linceecom-production-0120.up.railway.app`
 - Endpoint: `/ws/notifications?token={auth_token}`
 - Auto-reconnect: 5 seconds on disconnect
 - Auth: JWT token from localStorage

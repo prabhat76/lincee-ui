@@ -10,7 +10,7 @@ const path = require('path');
 const FormData = require('form-data');
 const https = require('https');
 
-const API_BASE_URL = 'https://linceecom-production.up.railway.app/api/v1';
+const API_BASE_URL = 'https://linceecom-production-0120.up.railway.app/api/v1';
 
 // You'll need to provide a valid token - for now we'll prompt for it
 const TOKEN = process.env.AUTH_TOKEN || process.argv[2];

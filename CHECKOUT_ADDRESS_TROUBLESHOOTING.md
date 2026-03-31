@@ -5,7 +5,7 @@
 ### Problem Description
 When users attempt to checkout, they encounter a `500 Internal Server Error` when the system tries to create an address at the endpoint:
 ```
-POST https://linceecom-production.up.railway.app/api/v1/addresses
+POST https://linceecom-production-0120.up.railway.app/api/v1/addresses
 ```
 
 **Error Response:**
@@ -122,7 +122,7 @@ console.log('User:', JSON.parse(user || '{}'));
 Use the browser's Network tab or a tool like Postman to test the endpoint directly:
 
 ```bash
-curl -X POST https://linceecom-production.up.railway.app/api/v1/addresses \
+curl -X POST https://linceecom-production-0120.up.railway.app/api/v1/addresses \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_TOKEN_HERE" \
   -d '{

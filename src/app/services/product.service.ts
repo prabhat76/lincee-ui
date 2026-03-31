@@ -36,7 +36,7 @@ export interface PaginatedResponse<T> {
 })
 export class ProductService {
   private apiService = inject(ApiService);
-  private readonly BASE_URL = 'https://linceecom-production.up.railway.app';
+  private readonly BASE_URL = 'https://linceecom-production-0120.up.railway.app';
 
   getProducts(): Observable<Product[]> {
     return this.apiService.get<any>('products', { skipAuth: true }).pipe(

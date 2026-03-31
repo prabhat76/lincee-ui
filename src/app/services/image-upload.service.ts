@@ -22,7 +22,7 @@ export interface UploadResponse {
 export class ImageUploadService {
   private apiService = inject(ApiService);
   private http = inject(HttpClient);
-  private readonly API_URL = 'https://linceecom-production.up.railway.app';
+  private readonly API_URL = 'https://linceecom-production-0120.up.railway.app';
   
   uploadProgress$ = new Subject<number>();
 

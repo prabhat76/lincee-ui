@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 })
 export class ApiService {
   private http = inject(HttpClient);
-  private baseUrl = 'https://linceecom-production.up.railway.app/api/v1';
+  private baseUrl = 'https://linceecom-production-0120.up.railway.app/api/v1';
 
   private getHeaders(skipAuth: boolean = false): HttpHeaders {
     let headers = new HttpHeaders();

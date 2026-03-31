@@ -17,7 +17,7 @@ export interface RealtimeNotification {
 export class RealtimeNotificationService {
   private authService = inject(AuthService);
   private ws: WebSocket | null = null;
-  private baseUrl = 'wss://linceecom-production.up.railway.app';
+  private baseUrl = 'wss://linceecom-production-0120.up.railway.app';
 
   notifications = signal<RealtimeNotification[]>([]);
   isConnected = signal(false);

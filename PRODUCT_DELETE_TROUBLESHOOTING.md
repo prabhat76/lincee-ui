@@ -33,7 +33,7 @@ When you click Delete, open the browser Developer Tools (F12 or Cmd+Option+I) an
 2. Click Delete button
 3. Look for a DELETE request to:
    ```
-   https://linceecom-production.up.railway.app/api/v1/products/[ID]
+   https://linceecom-production-0120.up.railway.app/api/v1/products/[ID]
    ```
 4. Check:
    - **Status**: Should be 200 (OK) or 204 (No Content)
@@ -272,7 +272,7 @@ In terminal:
 # Replace TOKEN and PRODUCT_ID with actual values
 curl -X DELETE \
   -H "Authorization: Bearer TOKEN" \
-  https://linceecom-production.up.railway.app/api/v1/products/PRODUCT_ID
+   https://linceecom-production-0120.up.railway.app/api/v1/products/PRODUCT_ID
 ```
 
 ### Expected Response
