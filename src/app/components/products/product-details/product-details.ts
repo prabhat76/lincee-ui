@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ProductService, Product } from '../../../services/product.service';
 import { CartService } from '../../../services/cart.service';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-product-details',
@@ -15,6 +16,7 @@ export class ProductDetailsComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private productService = inject(ProductService);
   private cartService = inject(CartService);
+  private authService = inject(AuthService);
   private router = inject(Router);
 
   product = signal<Product | null>(null);
@@ -60,6 +62,7 @@ export class ProductDetailsComponent implements OnInit {
   }
 
   addToCart() {
+    if (!this.ensureAuthenticated()) return;
     if (this.addingToCart()) return;
     const p = this.product();
     if (!p) return;
@@ -80,6 +83,7 @@ export class ProductDetailsComponent implements OnInit {
   }
 
   buyNow() {
+    if (!this.ensureAuthenticated()) return;
     if (this.addingToCart()) return;
     const p = this.product();
     if (!p) return;
@@ -98,6 +102,7 @@ export class ProductDetailsComponent implements OnInit {
   }
 
   increaseQuantity() {
+    if (!this.ensureAuthenticated()) return;
     if (this.addingToCart()) return;
     const p = this.product();
     if (!p) return;
@@ -109,6 +114,7 @@ export class ProductDetailsComponent implements OnInit {
   }
 
   decreaseQuantity() {
+    if (!this.ensureAuthenticated()) return;
     if (this.addingToCart()) return;
     const p = this.product();
     if (!p) return;
@@ -152,5 +158,15 @@ export class ProductDetailsComponent implements OnInit {
     );
 
     return match?.url || null;
+  }
+
+  private ensureAuthenticated(): boolean {
+    if (this.authService.isAuthenticated()) {
+      return true;
+    }
+
+    this.message.set('Please log in to continue.');
+    this.router.navigate(['/login'], { queryParams: { redirect: this.router.url } });
+    return false;
   }
 }

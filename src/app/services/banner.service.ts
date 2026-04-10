@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { ApiService } from '../core/api.service';
-import { Observable } from 'rxjs';
+import { Observable, catchError } from 'rxjs';
 
 export interface Banner {
   id: number;
@@ -60,7 +60,9 @@ export class BannerService {
    */
   createBanner(banner: Partial<Banner>): Observable<Banner> {
     console.log('➕ Creating new banner:', banner.title);
-    return this.apiService.post<Banner>('admin/banners', banner);
+    return this.apiService.post<Banner>('banners/admin', banner).pipe(
+      catchError(() => this.apiService.post<Banner>('admin/banners', banner))
+    );
   }
 
   /**
@@ -68,7 +70,9 @@ export class BannerService {
    */
   updateBanner(id: number, banner: Partial<Banner>): Observable<Banner> {
     console.log('✏️ Updating banner:', id);
-    return this.apiService.put<Banner>(`admin/banners/${id}`, banner);
+    return this.apiService.put<Banner>(`banners/admin/${id}`, banner).pipe(
+      catchError(() => this.apiService.put<Banner>(`admin/banners/${id}`, banner))
+    );
   }
 
   /**
@@ -76,7 +80,9 @@ export class BannerService {
    */
   deleteBanner(id: number): Observable<void> {
     console.log('🗑️ Deleting banner:', id);
-    return this.apiService.delete<void>(`admin/banners/${id}`);
+    return this.apiService.delete<void>(`banners/admin/${id}`).pipe(
+      catchError(() => this.apiService.delete<void>(`admin/banners/${id}`))
+    );
   }
 
   /**
@@ -84,7 +90,9 @@ export class BannerService {
    */
   toggleBannerStatus(id: number): Observable<Banner> {
     console.log('🔄 Toggling banner status:', id);
-    return this.apiService.patch<Banner>(`admin/banners/${id}/toggle`, {});
+    return this.apiService.patch<Banner>(`banners/admin/${id}/toggle`, {}).pipe(
+      catchError(() => this.apiService.patch<Banner>(`admin/banners/${id}/toggle`, {}))
+    );
   }
 
   /**
@@ -92,6 +100,8 @@ export class BannerService {
    */
   reorderBanners(bannerIds: number[]): Observable<void> {
     console.log('↕️ Reordering banners');
-    return this.apiService.post<void>('admin/banners/reorder', { bannerIds });
+    return this.apiService.post<void>('banners/admin/reorder', { bannerIds }).pipe(
+      catchError(() => this.apiService.post<void>('admin/banners/reorder', { bannerIds }))
+    );
   }
 }

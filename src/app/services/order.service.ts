@@ -39,8 +39,8 @@ export class OrderService {
   }
 
   getUserOrders(userId: number): Observable<any> {
-    return this.apiService.get<any>(`orders/user/${userId}/list`).pipe(
-      catchError(() => this.apiService.get<any>(`orders/user/${userId}`)),
+    return this.apiService.get<any>(`orders/user/${userId}`).pipe(
+      catchError(() => this.apiService.get<any>(`orders/user/${userId}/list`)),
       map((data: any) => {
         const raw = Array.isArray(data) ? data : data?.content || [];
         return raw.map((order: any) => ({

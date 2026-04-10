@@ -3,7 +3,7 @@ import { ApiService } from '../core/api.service';
 import { ProductService, Product } from './product.service';
 import { AuthService } from './auth.service';
 import { NotificationService } from './notification.service';
-import { Observable, tap, catchError, of, map, combineLatest, switchMap } from 'rxjs';
+import { Observable, tap, catchError, of, map, combineLatest, switchMap, throwError } from 'rxjs';
 
 export interface CartItem {
   id?: number; // Cart Item ID from API
@@ -75,12 +75,24 @@ export class CartService {
     }
 
     // Use the specific items endpoint which returns rich data
-    return this.apiService.get<any[]>(`cart/user/${userId}/items`).pipe(
-      map(items => {
-        // Safe check if response is array
-        const rawItems = Array.isArray(items) ? items : [];
+    return this.apiService.get<any>(`cart/user/${userId}/items`).pipe(
+      catchError(err => {
+        // If cart does not exist yet, create/get it first then retry items.
+        if (err?.status === 404) {
+          return this.ensureCartExists(userId).pipe(
+            switchMap(() => this.apiService.get<any>(`cart/user/${userId}/items`))
+          );
+        }
+        // Backend variants sometimes use /users/{id}/items
+        if (err?.status === 400) {
+          return this.apiService.get<any>(`cart/users/${userId}/items`);
+        }
+        return throwError(() => err);
+      }),
+      map(response => {
+        const rawItems = this.extractCartItems(response);
 
-        const cartItems: CartItem[] = rawItems.map(item => ({
+        const cartItems: CartItem[] = rawItems.map((item: any) => ({
           id: item.id,
           productId: item.productId,
           quantity: item.quantity,
@@ -88,8 +100,8 @@ export class CartService {
           color: item.color,
           // API returns rich data, fallback to defaults
           productName: item.productName || 'Unknown Product',
-          price: item.unitPrice || 0,
-          image: item.productImage || 'assets/image.png'
+          price: item.unitPrice || item.price || 0,
+          image: item.productImage || item.imageUrl || item.image || 'assets/image.png'
         }));
 
         const total = cartItems.reduce((acc, item) => acc + ((item.price || 0) * item.quantity), 0);
@@ -144,20 +156,23 @@ export class CartService {
         );
     } else {
         // Item new -> Create (POST)
-        // Backend expects @RequestParam (Query Params), not JSON body
-        let queryParams = `?productId=${productId}&quantity=${quantity}`;
-        if (size) queryParams += `&size=${size}`;
-        if (color) queryParams += `&color=${color}`;
+        // Current backend contract expects JSON body.
+        const payload = {
+          productId,
+          quantity,
+          size: targetSize,
+          color: targetColor
+        };
 
-        // Pass empty object {} as body because it's a POST
-        return this.apiService.post<any>(`cart/user/${userId}/items${queryParams}`, {}).pipe(
+        return this.ensureCartExists(userId).pipe(
+          switchMap(() => this.postCartItemWithFallback(userId, payload)),
           tap((newItem) => {
              // CRITICAL FIX: Immediately update the local item with the returned ID
              // This ensures that subsequent clicks find an ID and use PUT instead of POST
              if (newItem && newItem.id) {
                  const current = this.cartState();
                  const items = [...current.items];
-                 const index = items.findIndex(i => i.productId === productId && (i.size||'M') === (size||'M'));
+                 const index = items.findIndex(i => i.productId === productId && (i.size||'M') === targetSize);
                  if (index > -1) {
                      items[index] = { ...items[index], id: newItem.id };
                      this.cartState.set({ ...current, items });
@@ -169,7 +184,7 @@ export class CartService {
           catchError(err => {
             console.warn('Add to cart failed', err);
             this.cartState.set(previousState);
-            this.notificationService.error('Failed to add item to cart');
+            this.notificationService.error(this.extractErrorMessage(err, 'Failed to add item to cart'));
             throw err;
           })
         );
@@ -225,7 +240,13 @@ export class CartService {
       return of(true);
     }
 
-    return this.apiService.delete(`cart/user/${userId}`).pipe(
+    return this.apiService.delete(`cart/user/${userId}/clear`).pipe(
+      catchError(err => {
+        if (err?.status === 404) {
+          return this.apiService.delete(`cart/user/${userId}`);
+        }
+        return throwError(() => err);
+      }),
       tap(() => {
         this.notificationService.success('Cart cleared');
         this.clearLocalCart();
@@ -307,5 +328,69 @@ export class CartService {
     // Recalculate total immediately to reflect UI changes without negative values
     const total = items.reduce((acc, i) => acc + (i.quantity * (i.price || 0)), 0);
     this.cartState.set({ items, total });
+  }
+
+  private extractCartItems(response: any): any[] {
+    if (Array.isArray(response)) {
+      return response;
+    }
+    if (Array.isArray(response?.items)) {
+      return response.items;
+    }
+    return [];
+  }
+
+  private ensureCartExists(userId: number): Observable<any> {
+    return this.apiService.get<any>(`cart/user/${userId}`).pipe(
+      catchError(err => {
+        // Some deployments expose /users/{id}
+        if (err?.status === 404) {
+          return this.apiService.get<any>(`cart/users/${userId}`);
+        }
+        return throwError(() => err);
+      })
+    );
+  }
+
+  private extractErrorMessage(err: any, fallback: string): string {
+    if (err?.error?.message) {
+      return err.error.message;
+    }
+    if (err?.message) {
+      return err.message;
+    }
+    return fallback;
+  }
+
+  private postCartItemWithFallback(userId: number, payload: { productId: number; quantity: number; size?: string; color?: string; }): Observable<any> {
+    return this.apiService.post<any>(`cart/user/${userId}/items`, payload).pipe(
+      catchError(err => {
+        // Some deployments expose /users/{id}/items instead of /user/{id}/items
+        if (err?.status === 404) {
+          return this.apiService.post<any>(`cart/users/${userId}/items`, payload);
+        }
+        // Some backends fail on extra fields like color; retry with minimal payload.
+        if (err?.status === 500) {
+          const minimalPayload = {
+            productId: payload.productId,
+            quantity: payload.quantity,
+            size: payload.size
+          };
+
+          return this.apiService.post<any>(`cart/user/${userId}/items`, minimalPayload).pipe(
+            catchError(innerErr => {
+              // Legacy variant that expects query params.
+              if (innerErr?.status === 500 || innerErr?.status === 404) {
+                let queryParams = `?productId=${payload.productId}&quantity=${payload.quantity}`;
+                if (payload.size) queryParams += `&size=${payload.size}`;
+                return this.apiService.post<any>(`cart/user/${userId}/items${queryParams}`, {});
+              }
+              return throwError(() => innerErr);
+            })
+          );
+        }
+        return throwError(() => err);
+      })
+    );
   }
 }

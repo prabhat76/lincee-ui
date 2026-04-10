@@ -1,6 +1,6 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { ApiService } from '../core/api.service';
-import { Observable, of } from 'rxjs';
+import { Observable, of, catchError } from 'rxjs';
 
 export type PaymentGateway = 'stripe' | 'phonepay' | 'gpay' | 'paypal' | 'cod';
 
@@ -72,12 +72,16 @@ export class PaymentService {
   }
 
   private initiateStripePayment(request: PaymentRequest): Observable<PaymentResponse> {
-    return this.apiService.post<PaymentResponse>('payments/stripe/initiate', {
+    const payload = {
       orderId: request.orderId,
       amount: request.amount,
       currency: request.currency,
       metadata: request.metadata
-    });
+    };
+
+    return this.apiService.post<PaymentResponse>('stripe/payment-intent', payload).pipe(
+      catchError(() => this.apiService.post<PaymentResponse>('payments/stripe/initiate', payload))
+    );
   }
 
   private initiatePhonePayPayment(request: PaymentRequest): Observable<PaymentResponse> {

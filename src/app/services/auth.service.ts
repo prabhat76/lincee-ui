@@ -2,7 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { ApiService } from '../core/api.service';
 import { HttpClient } from '@angular/common/http'; // Used for raw requests if ApiService is too generic, but ApiService is fine.
 import { Router } from '@angular/router';
-import { tap } from 'rxjs';
+import { tap, catchError } from 'rxjs';
 
 interface LoginResponse {
   token: string;
@@ -27,7 +27,9 @@ export class AuthService {
   // Helper to get the reliable ID regardless of structure
   get currentUserId(): number | null {
     const user = this.currentUser();
-    return user?.id || user?.userId || null;
+    if (user?.id) return Number(user.id);
+    if (user?.userId) return Number(user.userId);
+    return this.getUserIdFromToken();
   }
 
   get currentUserRole(): string | null {
@@ -51,8 +53,47 @@ export class AuthService {
         } catch (e) {
           console.error('Failed to parse user from storage', e);
           localStorage.removeItem('user'); // Clear bad data
+          this.hydrateUserFromProfile();
         }
+      } else {
+        // Token exists but no cached user. Hydrate user to ensure userId-dependent APIs work.
+        this.hydrateUserFromProfile();
       }
+    }
+  }
+
+  private hydrateUserFromProfile() {
+    this.apiService.get<any>('users/profile').pipe(
+      catchError(() => this.apiService.get<any>('user/profile'))
+    ).subscribe({
+      next: (profile) => {
+        if (!profile) return;
+        this.currentUser.set(profile);
+        localStorage.setItem('user', JSON.stringify(profile));
+      },
+      error: (err) => {
+        console.warn('Failed to hydrate user profile from token', err);
+      }
+    });
+  }
+
+  private getUserIdFromToken(): number | null {
+    const token = localStorage.getItem('token');
+    if (!token) return null;
+
+    try {
+      const payloadPart = token.split('.')[1];
+      if (!payloadPart) return null;
+
+      const normalized = payloadPart.replace(/-/g, '+').replace(/_/g, '/');
+      const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=');
+      const payload = JSON.parse(atob(padded));
+
+      const rawId = payload?.userId ?? payload?.id ?? payload?.sub;
+      const parsed = Number(rawId);
+      return Number.isFinite(parsed) ? parsed : null;
+    } catch {
+      return null;
     }
   }
 

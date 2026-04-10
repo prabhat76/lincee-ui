@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { ApiService } from '../core/api.service';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, catchError } from 'rxjs';
 
 export interface User {
   id: number;
@@ -17,7 +17,8 @@ export class UserService {
   currentUser = signal<User | null>(null);
 
   getProfile(): Observable<User> {
-    return this.apiService.get<User>('user/profile').pipe(
+    return this.apiService.get<User>('users/profile').pipe(
+      catchError(() => this.apiService.get<User>('user/profile')),
       tap(user => this.currentUser.set(user))
     );
   }

@@ -1,9 +1,10 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ProductService, Product, PaginatedResponse } from '../../services/product.service';
 import { CartService } from '../../services/cart.service';
+import { AuthService } from '../../services/auth.service';
 
 interface CategoryGroup {
   name: string;
@@ -21,6 +22,8 @@ interface CategoryGroup {
 export class ProductsComponent implements OnInit {
   private productService = inject(ProductService);
   private cartService = inject(CartService);
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
   // State
   allProducts: Product[] = [];
@@ -125,6 +128,7 @@ export class ProductsComponent implements OnInit {
 
   increaseQuantity(product: Product, event: Event) {
     event.stopPropagation(); // Prevent navigation
+    if (!this.ensureAuthenticated()) return;
     this.addingState[product.id] = true;
     
     // Default to M/Black for quick add from grid
@@ -136,6 +140,7 @@ export class ProductsComponent implements OnInit {
 
   decreaseQuantity(product: Product, event: Event) {
     event.stopPropagation(); // Prevent navigation
+    if (!this.ensureAuthenticated()) return;
     this.addingState[product.id] = true;
 
     // Use updateQuantity which handles negative updates or removal
@@ -180,5 +185,14 @@ export class ProductsComponent implements OnInit {
     );
 
     return match?.url || null;
+  }
+
+  private ensureAuthenticated(): boolean {
+    if (this.authService.isAuthenticated()) {
+      return true;
+    }
+
+    this.router.navigate(['/login'], { queryParams: { redirect: this.router.url } });
+    return false;
   }
 }
