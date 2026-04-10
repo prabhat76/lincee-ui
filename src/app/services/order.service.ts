@@ -7,6 +7,11 @@ export interface OrderItem {
   productId: number;
   quantity: number;
   price: number;
+  unitPrice?: number;
+  totalPrice?: number;
+  productName?: string;
+  size?: string;
+  color?: string;
 }
 
 export interface Order {
@@ -14,6 +19,9 @@ export interface Order {
   user: { id: number };
   orderItems: OrderItem[];
   items?: OrderItem[];
+  itemCount?: number;
+  totalItems?: number;
+  totalQuantity?: number;
   totalAmount: number;
   status: string; // PENDING, CONFIRMED, SHIPPED, DELIVERED
   shippingAddress: string;
@@ -27,6 +35,56 @@ export interface Order {
 })
 export class OrderService {
   private apiService = inject(ApiService);
+
+  private normalizeOrderItem(item: any): OrderItem {
+    const quantity = Number(item?.quantity ?? 1) || 1;
+    const unitPrice = Number(item?.unitPrice ?? item?.price ?? 0) || 0;
+    const totalPrice = Number(item?.totalPrice ?? (unitPrice * quantity)) || 0;
+
+    return {
+      ...item,
+      quantity,
+      unitPrice,
+      totalPrice,
+      price: unitPrice
+    } as OrderItem;
+  }
+
+  private normalizeOrder(order: any): any {
+    return {
+      ...order,
+      orderItems: this.extractOrderItems(order).map(item => this.normalizeOrderItem(item)),
+      itemCount: order?.itemCount ?? order?.totalItems ?? order?.totalQuantity ?? 0
+    };
+  }
+
+  private extractOrderItems(order: any): any[] {
+    const candidates = [
+      order?.orderItems,
+      order?.items,
+      order?.orderItemDtos,
+      order?.orderItemsDto,
+      order?.orderDetails,
+      order?.lineItems,
+      order?.orderLines,
+      order?.products
+    ];
+
+    for (const candidate of candidates) {
+      if (Array.isArray(candidate)) {
+        return candidate;
+      }
+
+      if (candidate && typeof candidate === 'object') {
+        const nested = candidate.content || candidate.data || candidate.results || candidate.items;
+        if (Array.isArray(nested)) {
+          return nested;
+        }
+      }
+    }
+
+    return [];
+  }
 
   createOrder(orderData: any, userId?: number): Observable<any> {
     const endpoint = userId ? `orders?userId=${encodeURIComponent(userId)}` : 'orders';
@@ -43,10 +101,7 @@ export class OrderService {
       catchError(() => this.apiService.get<any>(`orders/user/${userId}/list`)),
       map((data: any) => {
         const raw = Array.isArray(data) ? data : data?.content || [];
-        return raw.map((order: any) => ({
-          ...order,
-          orderItems: order.orderItems || order.items || []
-        }));
+        return raw.map((order: any) => this.normalizeOrder(order));
       }),
       catchError(err => {
         console.error(`Failed to load orders for user ${userId}`, err);
@@ -57,10 +112,7 @@ export class OrderService {
 
   getOrder(orderId: number): Observable<Order> {
     return this.apiService.get<any>(`orders/${orderId}`).pipe(
-      map((data: any) => ({
-        ...data,
-        orderItems: data.orderItems || data.items || []
-      })),
+      map((data: any) => this.normalizeOrder(data)),
       catchError(err => {
         console.error(`Failed to load order ${orderId}`, err);
         return throwError(() => err);
@@ -72,10 +124,7 @@ export class OrderService {
     return this.apiService.get<any>(`orders/status/${status}`).pipe(
       map((data: any) => {
         const raw = Array.isArray(data) ? data : data?.content || [];
-        return raw.map((order: any) => ({
-          ...order,
-          orderItems: order.orderItems || order.items || []
-        }));
+        return raw.map((order: any) => this.normalizeOrder(order));
       }),
       catchError(err => {
         console.error(`Failed to load orders with status ${status}`, err);

@@ -4,6 +4,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ProductService, Product } from '../../../services/product.service';
 import { CartService } from '../../../services/cart.service';
 import { AuthService } from '../../../services/auth.service';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-product-details',
@@ -17,18 +18,20 @@ export class ProductDetailsComponent implements OnInit {
   private productService = inject(ProductService);
   private cartService = inject(CartService);
   private authService = inject(AuthService);
+  private notificationService = inject(NotificationService);
   private router = inject(Router);
 
   product = signal<Product | null>(null);
   loading = signal<boolean>(true);
-  selectedColor = signal<string>('Red');
+  selectedColor = signal<string>('');
   selectedSize = signal<string>('M');
   
-  colors = ['Red', 'Blue', 'Black', 'Green'];
-  sizes = ['S', 'M', 'L', 'XL'];
+  colors: string[] = [];
+  sizes: string[] = ['M'];
 
   addingToCart = signal<boolean>(false);
   message = signal<string>('');
+  private addCooldownUntil = 0;
 
   ngOnInit() {
     this.route.params.subscribe(params => {
@@ -44,6 +47,10 @@ export class ProductDetailsComponent implements OnInit {
     this.productService.getProduct(id).subscribe({
       next: (data) => {
         this.product.set(data);
+        this.sizes = data.availableSizes?.length ? data.availableSizes : ['M'];
+        this.colors = data.availableColors?.length ? data.availableColors : [];
+        this.selectedSize.set(this.sizes[0] || 'M');
+        this.selectedColor.set(this.colors[0] || '');
         this.loading.set(false);
       },
       error: (err) => {
@@ -64,12 +71,16 @@ export class ProductDetailsComponent implements OnInit {
   addToCart() {
     if (!this.ensureAuthenticated()) return;
     if (this.addingToCart()) return;
+    if (Date.now() < this.addCooldownUntil) {
+      this.notificationService.warning('Please wait a moment before retrying.');
+      return;
+    }
     const p = this.product();
     if (!p) return;
 
     this.addingToCart.set(true);
     // Passing size/color if I can update CartService
-    this.cartService.addToCart(p.id, 1, this.selectedSize(), this.selectedColor()).subscribe({
+    this.cartService.addToCart(p.id, 1, this.selectedSize(), this.selectedColor() || undefined).subscribe({
       next: () => {
         this.addingToCart.set(false);
         this.message.set('Added to cart!');
@@ -77,6 +88,7 @@ export class ProductDetailsComponent implements OnInit {
       },
       error: () => {
         this.addingToCart.set(false);
+        this.addCooldownUntil = Date.now() + 1500;
         this.message.set('Failed to add to cart.');
       }
     });
@@ -85,17 +97,22 @@ export class ProductDetailsComponent implements OnInit {
   buyNow() {
     if (!this.ensureAuthenticated()) return;
     if (this.addingToCart()) return;
+    if (Date.now() < this.addCooldownUntil) {
+      this.notificationService.warning('Please wait a moment before retrying.');
+      return;
+    }
     const p = this.product();
     if (!p) return;
 
     this.addingToCart.set(true);
-    this.cartService.addToCart(p.id, 1, this.selectedSize(), this.selectedColor()).subscribe({
+    this.cartService.addToCart(p.id, 1, this.selectedSize(), this.selectedColor() || undefined).subscribe({
       next: () => {
         this.addingToCart.set(false);
         this.router.navigate(['/checkout']);
       },
       error: () => {
         this.addingToCart.set(false);
+        this.addCooldownUntil = Date.now() + 1500;
         this.message.set('Failed to add to cart.');
       }
     });
@@ -107,7 +124,7 @@ export class ProductDetailsComponent implements OnInit {
     const p = this.product();
     if (!p) return;
     this.addingToCart.set(true);
-    this.cartService.addToCart(p.id, 1, this.selectedSize(), this.selectedColor()).subscribe({
+    this.cartService.addToCart(p.id, 1, this.selectedSize(), this.selectedColor() || undefined).subscribe({
       next: () => this.addingToCart.set(false),
       error: () => this.addingToCart.set(false)
     });

@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { ProductService, Product, PaginatedResponse } from '../../services/product.service';
 import { CartService } from '../../services/cart.service';
 import { AuthService } from '../../services/auth.service';
+import { NotificationService } from '../../services/notification.service';
 
 interface CategoryGroup {
   name: string;
@@ -23,6 +24,7 @@ export class ProductsComponent implements OnInit {
   private productService = inject(ProductService);
   private cartService = inject(CartService);
   private authService = inject(AuthService);
+  private notificationService = inject(NotificationService);
   private router = inject(Router);
 
   // State
@@ -40,6 +42,7 @@ export class ProductsComponent implements OnInit {
 
   // Track adding state per product ID
   addingState: { [key: number]: boolean } = {};
+  private addCooldownUntil: { [key: number]: number } = {};
   private searchTimeout: any;
 
   ngOnInit() {
@@ -129,12 +132,23 @@ export class ProductsComponent implements OnInit {
   increaseQuantity(product: Product, event: Event) {
     event.stopPropagation(); // Prevent navigation
     if (!this.ensureAuthenticated()) return;
+    if (this.isAdding(product.id)) return;
+    const now = Date.now();
+    if ((this.addCooldownUntil[product.id] || 0) > now) {
+      this.notificationService.warning('Please wait a moment before retrying.');
+      return;
+    }
     this.addingState[product.id] = true;
+
+    const preferredSize = product.availableSizes?.[0] || 'M';
+    const preferredColor = product.availableColors?.[0];
     
-    // Default to M/Black for quick add from grid
-    this.cartService.addToCart(product.id, 1, 'M', 'Black').subscribe({
+    this.cartService.addToCart(product.id, 1, preferredSize, preferredColor).subscribe({
       next: () => this.addingState[product.id] = false,
-      error: () => this.addingState[product.id] = false
+      error: () => {
+        this.addingState[product.id] = false;
+        this.addCooldownUntil[product.id] = Date.now() + 1500;
+      }
     });
   }
 

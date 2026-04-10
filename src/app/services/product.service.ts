@@ -18,6 +18,8 @@ export interface Product {
   images: string[];
   productImages?: ProductImage[]; // Multiple views with metadata
   category?: string;
+  availableSizes?: string[];
+  availableColors?: string[];
   imageUrls?: string[];
 }
 

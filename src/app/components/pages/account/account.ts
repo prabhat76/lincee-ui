@@ -90,7 +90,13 @@ export class AccountComponent implements OnInit {
   }
 
   getOrderItems(order: Order): any[] {
-    return (order as any).orderItems || (order as any).items || [];
+    const items = (order as any).orderItems
+      || (order as any).items
+      || (order as any).orderItemDtos
+      || (order as any).orderDetails
+      || [];
+
+    return Array.isArray(items) ? items : [];
   }
 
   // Stepper helper methods

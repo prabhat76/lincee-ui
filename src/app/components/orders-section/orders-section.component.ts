@@ -529,6 +529,17 @@ export class OrdersSectionComponent {
   }
 
   getOrderItems(order: Order): any[] {
-    return (order as any).orderItems || (order as any).items || [];
+    const items = (order as any).orderItems
+      || (order as any).items
+      || (order as any).orderItemDtos
+      || (order as any).orderDetails
+      || [];
+
+    if (Array.isArray(items) && items.length > 0) {
+      return items;
+    }
+
+    const count = Number((order as any).itemCount ?? (order as any).totalItems ?? (order as any).totalQuantity ?? 0);
+    return count > 0 ? Array.from({ length: count }, () => ({})) : [];
   }
 }

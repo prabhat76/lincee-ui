@@ -348,6 +348,7 @@ export class CheckoutComponent implements OnInit {
           notes: fullAddress,
           shippingAddressId: addressId,
           billingAddressId: addressId,
+          // Backend create-order contract expects `orderItems`.
           orderItems: this.cart().items.map(i => ({
             productId: i.productId,
             quantity: i.quantity,
@@ -398,18 +399,30 @@ export class CheckoutComponent implements OnInit {
     }).subscribe({
       next: (response) => {
         this.notificationService.success(`Payment processing with ${gateway.toUpperCase()}...`);
-        
-        if (response.redirectUrl) {
-          // Redirect to payment gateway
-          window.location.href = response.redirectUrl;
-        } else {
-          // Payment successful
-          this.notificationService.success('Payment completed successfully!');
-          this.cartService.clearCart().subscribe(() => {
-            this.router.navigate(['/account']);
-          });
-        }
-        this.loading = false;
+
+        // Always clear cart after order placement to prevent stale cart contents.
+        this.cartService.clearCart().subscribe({
+          next: () => {
+            if (response.redirectUrl) {
+              window.location.href = response.redirectUrl;
+            } else {
+              this.notificationService.success('Payment completed successfully!');
+              this.router.navigate(['/account']);
+            }
+            this.loading = false;
+          },
+          error: () => {
+            // Fallback to local clear so UI state remains consistent.
+            this.cartService.clearLocalCart();
+            if (response.redirectUrl) {
+              window.location.href = response.redirectUrl;
+            } else {
+              this.notificationService.success('Payment completed successfully!');
+              this.router.navigate(['/account']);
+            }
+            this.loading = false;
+          }
+        });
       },
       error: (err) => {
         console.error(err);

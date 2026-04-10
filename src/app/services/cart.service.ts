@@ -134,12 +134,11 @@ export class CartService {
     // Snapshot current state for rollback
     const previousState = this.cartState();
 
-    // Update local state immediately for UI responsiveness
-    this.updateLocalState(productId, quantity, targetSize, targetColor);
-
     if (!userId) {
+       // Guest flow remains local-only.
+       this.updateLocalState(productId, quantity, targetSize, targetColor);
        console.warn('User not logged in, cart changes are local only');
-       return of(true); 
+       return of(true);
     }
 
     if (existingItem && existingItem.id) {
@@ -167,17 +166,6 @@ export class CartService {
         return this.ensureCartExists(userId).pipe(
           switchMap(() => this.postCartItemWithFallback(userId, payload)),
           tap((newItem) => {
-             // CRITICAL FIX: Immediately update the local item with the returned ID
-             // This ensures that subsequent clicks find an ID and use PUT instead of POST
-             if (newItem && newItem.id) {
-                 const current = this.cartState();
-                 const items = [...current.items];
-                 const index = items.findIndex(i => i.productId === productId && (i.size||'M') === targetSize);
-                 if (index > -1) {
-                     items[index] = { ...items[index], id: newItem.id };
-                     this.cartState.set({ ...current, items });
-                 }
-             }
              this.notificationService.success('Item added to cart');
           }),
           switchMap(() => this.loadCart()),
@@ -353,42 +341,37 @@ export class CartService {
   }
 
   private extractErrorMessage(err: any, fallback: string): string {
+    if (err?.error?.details) {
+      return err.error.details;
+    }
     if (err?.error?.message) {
       return err.error.message;
     }
+    if (typeof err?.error === 'string' && err.error.trim()) {
+      return err.error;
+    }
     if (err?.message) {
       return err.message;
+    }
+    if (err?.status) {
+      return `${fallback} (HTTP ${err.status})`;
     }
     return fallback;
   }
 
   private postCartItemWithFallback(userId: number, payload: { productId: number; quantity: number; size?: string; color?: string; }): Observable<any> {
-    return this.apiService.post<any>(`cart/user/${userId}/items`, payload).pipe(
+    let queryParams = `?productId=${encodeURIComponent(payload.productId)}&quantity=${encodeURIComponent(payload.quantity)}`;
+    if (payload.size) queryParams += `&size=${encodeURIComponent(payload.size)}`;
+    if (payload.color) queryParams += `&color=${encodeURIComponent(payload.color)}`;
+
+    return this.apiService.post<any>(`cart/user/${userId}/items${queryParams}`, {}).pipe(
       catchError(err => {
         // Some deployments expose /users/{id}/items instead of /user/{id}/items
         if (err?.status === 404) {
-          return this.apiService.post<any>(`cart/users/${userId}/items`, payload);
+          return this.apiService.post<any>(`cart/users/${userId}/items${queryParams}`, {});
         }
-        // Some backends fail on extra fields like color; retry with minimal payload.
-        if (err?.status === 500) {
-          const minimalPayload = {
-            productId: payload.productId,
-            quantity: payload.quantity,
-            size: payload.size
-          };
-
-          return this.apiService.post<any>(`cart/user/${userId}/items`, minimalPayload).pipe(
-            catchError(innerErr => {
-              // Legacy variant that expects query params.
-              if (innerErr?.status === 500 || innerErr?.status === 404) {
-                let queryParams = `?productId=${payload.productId}&quantity=${payload.quantity}`;
-                if (payload.size) queryParams += `&size=${payload.size}`;
-                return this.apiService.post<any>(`cart/user/${userId}/items${queryParams}`, {});
-              }
-              return throwError(() => innerErr);
-            })
-          );
-        }
+        // For backend 5xx, avoid spamming multiple POST retries from frontend.
+        // Let the caller surface the server error clearly.
         return throwError(() => err);
       })
     );
