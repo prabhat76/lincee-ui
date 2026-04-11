@@ -20,6 +20,9 @@ export interface Product {
   category?: string;
   availableSizes?: string[];
   availableColors?: string[];
+  isActive?: boolean;
+  active?: boolean;
+  status?: string;
   imageUrls?: string[];
 }
 
@@ -40,13 +43,25 @@ export class ProductService {
   private apiService = inject(ApiService);
   private readonly BASE_URL = 'https://linceecom-production-0120.up.railway.app';
 
+  private isDisplayableProduct(p: Product): boolean {
+    const status = String((p as any).status || '').toUpperCase();
+    if (status && status !== 'ACTIVE') return false;
+
+    if ((p as any).isActive === false) return false;
+    if ((p as any).active === false) return false;
+
+    return true;
+  }
+
   getProducts(): Observable<Product[]> {
     return this.apiService.get<any>('products', { skipAuth: true }).pipe(
       tap(response => console.log('Products API Response:', response)),
       map(response => {
         if (!response) return [];
         const items = Array.isArray(response) ? response : (response.content || response.data || response.results || []);
-        return items.map((p: any) => this.transformProduct(p));
+        return items
+          .map((p: any) => this.transformProduct(p))
+          .filter((p: Product) => this.isDisplayableProduct(p));
       })
     );
   }
@@ -64,7 +79,9 @@ export class ProductService {
         const totalPages = response.totalPages || Math.ceil(totalElements / size);
         
         return {
-          content: content.map((p: any) => this.transformProduct(p)),
+          content: content
+            .map((p: any) => this.transformProduct(p))
+            .filter((p: Product) => this.isDisplayableProduct(p)),
           totalElements,
           totalPages,
           size: response.size || size,
@@ -92,7 +109,9 @@ export class ProductService {
       map(response => {
         if (!response) return [];
         const items = Array.isArray(response) ? response : (response.content || response.data || response.results || []);
-        return items.map((p: any) => this.transformProduct(p));
+        return items
+          .map((p: any) => this.transformProduct(p))
+          .filter((p: Product) => this.isDisplayableProduct(p));
       }),
       catchError(err => {
         console.error('Failed to load featured products', err);
@@ -137,6 +156,9 @@ export class ProductService {
     return {
       ...p,
       name: p.name || 'Unknown Product',
+      isActive: p.isActive ?? p.active ?? (String(p.status || '').toUpperCase() === 'ACTIVE'),
+      active: p.active ?? p.isActive,
+      status: p.status,
       category: (typeof p.category === 'object' && p.category !== null) ? p.category.name : (p.category || 'Other'),
       productImages,
       images: (p.imageUrls && p.imageUrls.length > 0)

@@ -108,6 +108,39 @@ $color-border: #e0e0e0;
   margin-top: 16px;
 }
 
+.btn-add-cart {
+  width: 100%;
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.btn-label {
+  transition: opacity 0.2s ease;
+
+  &.hidden {
+    visibility: hidden;
+  }
+}
+
+.btn-spinner {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+
+  &.visible {
+    opacity: 1;
+    animation: spin 0.7s linear infinite;
+  }
+}
+
 
 
 .quantity-controls {
