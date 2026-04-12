@@ -41,7 +41,7 @@ import { NotificationService } from '../../services/notification.service';
           <span class="col-order">
             <strong>#{{ order.id }}</strong>
           </span>
-          <span class="col-items">{{ getOrderItems(order).length }} item(s)</span>
+          <span class="col-items">{{ getOrderItemsSummary(order) }}</span>
           <span class="col-total">{{ order.totalAmount | currency }}</span>
           <span class="col-status">
             <span [ngClass]=\"'status-' + order.status.toLowerCase()\">
@@ -541,5 +541,20 @@ export class OrdersSectionComponent {
 
     const count = Number((order as any).itemCount ?? (order as any).totalItems ?? (order as any).totalQuantity ?? 0);
     return count > 0 ? Array.from({ length: count }, () => ({})) : [];
+  }
+
+  getOrderItemsSummary(order: Order): string {
+    const items = this.getOrderItems(order);
+    const namedItems = items
+      .map((item: any) => item?.productName || item?.name)
+      .filter((name: any) => typeof name === 'string' && name.trim().length > 0);
+
+    if (namedItems.length > 0) {
+      const preview = namedItems.slice(0, 2).join(', ');
+      const extra = namedItems.length > 2 ? ` +${namedItems.length - 2}` : '';
+      return `${preview}${extra}`;
+    }
+
+    return `${items.length} item(s)`;
   }
 }

@@ -53,15 +53,18 @@ export class ProductService {
     return true;
   }
 
+  private filterDisplayableProducts(products: Product[]): Product[] {
+    const visibleProducts = products.filter(p => this.isDisplayableProduct(p));
+    return visibleProducts.length > 0 ? visibleProducts : products;
+  }
+
   getProducts(): Observable<Product[]> {
     return this.apiService.get<any>('products', { skipAuth: true }).pipe(
       tap(response => console.log('Products API Response:', response)),
       map(response => {
         if (!response) return [];
         const items = Array.isArray(response) ? response : (response.content || response.data || response.results || []);
-        return items
-          .map((p: any) => this.transformProduct(p))
-          .filter((p: Product) => this.isDisplayableProduct(p));
+        return this.filterDisplayableProducts(items.map((p: any) => this.transformProduct(p)));
       })
     );
   }
@@ -78,10 +81,9 @@ export class ProductService {
         const totalElements = response.totalElements || response.total || content.length;
         const totalPages = response.totalPages || Math.ceil(totalElements / size);
         
+        const products = content.map((p: any) => this.transformProduct(p));
         return {
-          content: content
-            .map((p: any) => this.transformProduct(p))
-            .filter((p: Product) => this.isDisplayableProduct(p)),
+          content: this.filterDisplayableProducts(products),
           totalElements,
           totalPages,
           size: response.size || size,
@@ -109,9 +111,7 @@ export class ProductService {
       map(response => {
         if (!response) return [];
         const items = Array.isArray(response) ? response : (response.content || response.data || response.results || []);
-        return items
-          .map((p: any) => this.transformProduct(p))
-          .filter((p: Product) => this.isDisplayableProduct(p));
+        return this.filterDisplayableProducts(items.map((p: any) => this.transformProduct(p)));
       }),
       catchError(err => {
         console.error('Failed to load featured products', err);
@@ -137,6 +137,10 @@ export class ProductService {
   }
 
   private transformProduct(p: any): Product {
+    const rawStatus = String(p.status || '').trim();
+    const normalizedStatus = rawStatus.toUpperCase();
+    const inferredActive = rawStatus ? normalizedStatus === 'ACTIVE' : undefined;
+
     const productImages = Array.isArray(p.productImages)
       ? p.productImages.map((image: any) => {
           const rawUrl = image?.url || image?.imageUrl || image?.path;
@@ -156,8 +160,8 @@ export class ProductService {
     return {
       ...p,
       name: p.name || 'Unknown Product',
-      isActive: p.isActive ?? p.active ?? (String(p.status || '').toUpperCase() === 'ACTIVE'),
-      active: p.active ?? p.isActive,
+      isActive: p.isActive ?? p.active ?? inferredActive,
+      active: p.active ?? p.isActive ?? inferredActive,
       status: p.status,
       category: (typeof p.category === 'object' && p.category !== null) ? p.category.name : (p.category || 'Other'),
       productImages,

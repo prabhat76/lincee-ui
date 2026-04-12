@@ -76,7 +76,7 @@ import { of, switchMap, catchError, tap } from 'rxjs';
           <div class="summary-section">
             <h2>Order Summary</h2>
             <div *ngFor="let item of cart().items" class="summary-item">
-              <span>{{ item.productName }} x {{ item.quantity }}</span>
+              <span>{{ item.productName || ('Product #' + item.productId) }} x {{ item.quantity }}</span>
               <span>{{ (item.price || 0) * item.quantity | currency }}</span>
             </div>
             <div class="total-row">

@@ -88,10 +88,10 @@
         <div class="items-grid">
           <div *ngFor="let item of getOrderItems(order)" class="item-card">
             <div class="item-image">
-              <img [src]="getItemImage(item)" [alt]="item.productName || ('Product ' + item.productId)" (error)="$any($event.target).src='assets/image.png'" />
+              <img [src]="getItemImage(item)" [alt]="item.productName || item.name || ('Product ' + item.productId)" (error)="$any($event.target).src='assets/image.png'" />
             </div>
             <div class="item-info">
-              <div class="item-name">Product ID: {{ item.productId }}</div>
+              <div class="item-name">{{ item.productName || item.name || ('Product #' + item.productId) }}</div>
               <div class="item-specs" *ngIf="item.size || item.color">
                 <span *ngIf="item.size">Size: {{ item.size }}</span>
                 <span *ngIf="item.color">Color: {{ item.color }}</span>

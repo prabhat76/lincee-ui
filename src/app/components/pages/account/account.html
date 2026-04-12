@@ -88,7 +88,7 @@
 
         <div class="order-items-preview">
           <div *ngFor="let item of getOrderItems(order)" class="preview-item">
-            <span>{{ item.quantity }}x Product (ID: {{ item.productId }})</span>
+            <span>{{ item.quantity }}x {{ item.productName || item.name || ('Product #' + item.productId) }}</span>
             <span class="price">{{ item.price | currency }}</span>
           </div>
         </div>
